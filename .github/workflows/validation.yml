@@ -27,4 +27,6 @@ jobs:
       uses: hacs/action@22.5.0
       with:
         category: 'plugin'
-      if: github.event_name != 'pull_request'
+      # The fork has no releases yet, so HACS can't find m3-hue-light-card.js on dev branches.
+      # Only validate main; the first release (step 6) makes this check pass.
+      if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
