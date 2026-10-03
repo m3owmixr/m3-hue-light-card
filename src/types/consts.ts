@@ -4,12 +4,13 @@ import { KnownIconSize } from './types-config';
 export class Consts {
     public static readonly Version = 'v1.11.0';
     public static readonly Dev = true;
-    public static readonly ElementPostfix = Consts.Dev ? '-test' : '';
-    public static readonly CardElementName = 'hue-like-light-card' + Consts.ElementPostfix;
-    public static readonly ApiProviderName = Consts.Dev ? 'hue_card_test' : 'hue_card';
+    // '-m3' keeps every inner element unique, so this fork can be installed alongside the original card
+    public static readonly ElementPostfix = Consts.Dev ? '-m3-test' : '-m3';
+    public static readonly CardElementName = 'm3-hue-light-card' + (Consts.Dev ? '-test' : '');
+    public static readonly ApiProviderName = Consts.Dev ? 'm3_hue_card_test' : 'm3_hue_card';
 
-    public static readonly CardName = 'Hue-Like Light Card' + (Consts.Dev ? ' [TEST]' : '');
-    public static readonly CardDescription = 'Hue-like way to control your lights' + (Consts.Dev ? ' [TEST]' : '');
+    public static readonly CardName = 'M3 Hue Light Card' + (Consts.Dev ? ' [TEST]' : '');
+    public static readonly CardDescription = 'Hue-like light control, restyled for Material 3' + (Consts.Dev ? ' [TEST]' : '');
 
     public static readonly HueBorderRadius = 10;
     public static readonly HueShadow = '0px 2px 3px rgba(0,0,0,0.4)';

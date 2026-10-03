@@ -100,10 +100,10 @@ jobs:
       with:
         tag_name: ${{ github.event.inputs.new_version }}
         draft: true
-        files: release/hue-like-light-card.js
+        files: release/m3-hue-light-card.js
         fail_on_unmatched_files: true
         body: |
-          ![Downloads](https://img.shields.io/github/downloads/gh61/lovelace-hue-like-light-card/${{ github.event.inputs.new_version }}/total)
+          ![Downloads](https://img.shields.io/github/downloads/m3owmixr/m3-hue-light-card/${{ github.event.inputs.new_version }}/total)
 
           ## Closed Issues ✅
           ${{ steps.issues_changelog.outputs.changelog }}

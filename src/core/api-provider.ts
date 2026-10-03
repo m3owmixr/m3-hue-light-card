@@ -67,7 +67,7 @@ export class HueApiProvider {
     }
 
     private static onHashChanged(hash: string, retry = 0) {
-        // we only react to '#hue_card:' prefixed hash
+        // we only react to '#m3_hue_card:' prefixed hash
         if (hash.indexOf('#' + Consts.ApiProviderName + ':') != 0)
             return;
 

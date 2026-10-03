@@ -17,8 +17,8 @@ interface HassWindowEventMap extends WindowEventMap {
 export interface IHassWindow extends Window {
     customCards?: HassCustomCardInfo[];
     customIcons?: Record<string, object>;
-    hue_card?: IApiWrapper;
-    hue_card_test?: IApiWrapper;
+    m3_hue_card?: IApiWrapper;
+    m3_hue_card_test?: IApiWrapper;
 
     // custom window events
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

@@ -1,3 +1,16 @@
+# M3 Hue Light Card
+
+> **This is a fork** of [Hue-Like Light Card](https://github.com/Gh61/lovelace-hue-like-light-card) by **Gh61 (Tom Zenkner)**. It restyles the card for **Material 3**: M3 tokens, an M3 wave slider, and shapes and typography. Everything people like about the original stays: the whole card tinted by the light's colour(s), the Hue-style scene dialog with [scene_presets](https://github.com/Hypfer/hass-scene_presets) support, and one card controlling several lights.
+>
+> - Card type: `custom:m3-hue-light-card`. It can be installed alongside the original card.
+> - API hash prefix: `#m3_hue_card:` (the original uses `#hue_card:`).
+> - Licence: LGPL-2.1, same as upstream. See [LICENSE](LICENSE) and [NOTICE](NOTICE).
+> - Slider design inspired by [M3 Cards](https://github.com/j0sp0r/m3-cards) by j0sp0r (MIT).
+>
+> **Work in progress.** The documentation below is the upstream README. Where it says `hue-like-light-card`, use `m3-hue-light-card`.
+
+---
+
 [![hacs_badge](https://img.shields.io/badge/HACS-Default-41BDF5.svg)](https://github.com/hacs/integration) [![Tests](https://github.com/Gh61/lovelace-hue-like-light-card/actions/workflows/validation.yml/badge.svg)](https://github.com/Gh61/lovelace-hue-like-light-card/actions/workflows/validation.yml) [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.me/paygh61/) ![Downloads](https://img.shields.io/github/downloads/Gh61/lovelace-hue-like-light-card/total.svg)
 
 

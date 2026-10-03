@@ -1,7 +1,7 @@
 {
-    "name": "hue-like-light-card",
+    "name": "m3-hue-light-card",
     "version": "v1.11.0",
-    "description": "Hue-Like Light Card",
+    "description": "M3 Hue Light Card (fork of Hue-Like Light Card by Gh61)",
     "keywords": [
         "home-assistant",
         "homeassistant",
@@ -10,9 +10,12 @@
         "lovelace",
         "custom-cards"
     ],
-    "module": "hue-like-light-card.js",
-    "repository": "git@github.com:Gh61/lovelace-hue-like-light-card.git",
+    "module": "m3-hue-light-card.js",
+    "repository": "git@github.com:m3owmixr/m3-hue-light-card.git",
     "author": "Tom Zenkner <t.zenkner@email.cz>",
+    "contributors": [
+        "m3owmixr (M3 restyle fork)"
+    ],
     "license": "LGPLv2.1",
     "dependencies": {
         "@egjs/hammerjs": "^2.0.17",

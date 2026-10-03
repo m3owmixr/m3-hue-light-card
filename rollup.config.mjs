@@ -49,6 +49,7 @@ export default cli => {
         output: {
             dir: dev ? "./dist" : "./release",
             format: "es",
+            entryFileNames: "m3-hue-light-card.js",
         },
         plugins: [
             json({compact:true}),

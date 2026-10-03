@@ -1,0 +1,18 @@
+M3 Hue Light Card
+Copyright (C) 2026 m3owmixr
+
+This project is a fork of Hue-Like Light Card:
+  https://github.com/Gh61/lovelace-hue-like-light-card
+  Copyright (C) Tom Zenkner (Gh61) and contributors
+  Licensed under the GNU Lesser General Public License v2.1 (see LICENSE).
+
+The fork is distributed under the same license, LGPL-2.1. All changes from
+the upstream project are recorded in this repository's git history.
+
+Third-party design references:
+  - Material Design 3 (https://m3.material.io/), used for design tokens and
+    component guidance.
+  - M3 Cards by j0sp0r (https://github.com/j0sp0r/m3-cards), MIT License, used
+    as the design reference for the M3 wave slider. If any code from it is
+    ported into this project, its copyright notice and the MIT license text
+    will be added here alongside that code.
