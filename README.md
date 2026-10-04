@@ -4,7 +4,7 @@
 >
 > - Card type: `custom:m3-hue-light-card`. It can be installed alongside the original card.
 > - API hash prefix: `#m3_hue_card:` (the original uses `#hue_card:`).
-> - Licence: LGPL-2.1, same as upstream. See [LICENSE](LICENSE) and [NOTICE](NOTICE).
+> - License: LGPL-2.1, same as upstream. See [LICENSE](LICENSE) and [NOTICE](NOTICE).
 > - Slider design inspired by [M3 Cards](https://github.com/j0sp0r/m3-cards) by j0sp0r (MIT).
 >
 > **Work in progress.** The documentation below is the upstream README. Where it says `hue-like-light-card`, use `m3-hue-light-card`.
