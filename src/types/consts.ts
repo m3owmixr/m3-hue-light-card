@@ -28,6 +28,15 @@ export class Consts {
     public static readonly DialogOffColor = '#363636';
     public static readonly GradientOffset = 7; // percent
     public static readonly TransitionDefault = 'all 0.3s ease-out 0s';
+    /** tint: harmonized - share of the light color mixed into the theme surface at full brightness (0..1) */
+    public static readonly HarmonizedTintAmount = 0.45;
+    /** tint: harmonized - share at the lowest brightness; brightness is shown by tint strength instead of the dark shadow */
+    public static readonly HarmonizedTintAmountMin = 0.15;
+    /** theme surface used for tint: harmonized, most specific first */
+    public static readonly TintSurfaceVariables = ['--md-sys-color-surface-container-high', '--ha-card-background', '--card-background-color'];
+    /** tint: harmonized off card, applied as CSS so it doesn't depend on parsing the theme value */
+    public static readonly TintSurfaceCss = 'var(--md-sys-color-surface-container-high, var(--ha-card-background, var(--card-background-color)))';
+    public static readonly TintOnSurfaceCss = 'var(--md-sys-color-on-surface, var(--primary-text-color))';
 
     // Theme colors
     public static readonly ThemeDefault = 'default';

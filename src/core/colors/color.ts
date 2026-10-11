@@ -290,6 +290,19 @@ export class Color {
         }
     }
 
+    /**
+     * Returns a new opaque color with @param amount (0..1) of @param other mixed into this color.
+     */
+    public mix(other: Color, amount: number): Color {
+        const a = Math.min(1, Math.max(0, amount));
+        const lerp = (from: number, to: number) => Math.round(from + (to - from) * a);
+        return new Color(
+            lerp(this.getRed(), other.getRed()),
+            lerp(this.getGreen(), other.getGreen()),
+            lerp(this.getBlue(), other.getBlue())
+        );
+    }
+
     public toString(): string {
         if (this._opacity < 1) {
             return `rgba(${this._red},${this._green},${this._blue},${this._opacity})`;

@@ -11,7 +11,7 @@ import { Consts } from './types/consts';
 import { nameof } from './types/extensions';
 import { ThemeHelper } from './types/theme-helper';
 import { IHassWindow } from './types/types-hass';
-import { HueLikeLightCardConfigInterface, KnownIconSize } from './types/types-config';
+import { HueLikeLightCardConfigInterface, KnownIconSize, TintType } from './types/types-config';
 import { ErrorInfo } from './core/error-info';
 import { Action, AsyncAction } from './types/functions';
 import { VersionNotifier } from './version-notifier';
@@ -425,16 +425,28 @@ export class HueLikeLightCard extends IdLitElement implements LovelaceCard {
         // BG: --card-background-color OR OLD: --paper-card-background-color
         // FG: --primary-text-color (for off: --secondary-text-color)
 
-        const bfg = ViewUtils.calculateBackAndForeground(this._ctrl, this._offBackground);
-        const shadow = ViewUtils.calculateDefaultShadow(card, this._ctrl, this._config.offShadow);
+        // tint: harmonized needs the theme surface; without it the card falls back to the full colors
+        const tintSurface = this._config.tint == TintType.Harmonized ? ThemeHelper.getTintSurface(this) : null;
+        const harmonized = tintSurface != null;
+        // harmonized off cards use the theme surface, unless offColor was set explicitly
+        const offBackground = harmonized && !this._config.wasOffColorSet
+            ? new Background([tintSurface])
+            : this._offBackground;
+
+        // harmonized: brightness is shown by the tint strength, so no dark shadow and the foreground follows the mixed color only
+        const bfg = ViewUtils.calculateBackAndForeground(this._ctrl, offBackground, !harmonized, offBackground, tintSurface);
+        const shadow = ViewUtils.calculateDefaultShadow(card, this._ctrl, this._config.offShadow, !harmonized);
+
+        // tint: harmonized off card = theme surface + on-surface text straight from CSS (spec), unless offColor was set
+        const surfaceWhenOff = this._config.tint == TintType.Harmonized && !this._config.wasOffColorSet && this._ctrl.isOff();
 
         this.style.setProperty(
             '--hue-background',
-            bfg.background?.toString() ?? Consts.ThemeCardBackgroundVar
+            surfaceWhenOff ? Consts.TintSurfaceCss : bfg.background?.toString() ?? Consts.ThemeCardBackgroundVar
         );
         this.style.setProperty(
             '--hue-text-color',
-            bfg.foreground?.toString() ?? Consts.ThemeSecondaryTextColorVar
+            surfaceWhenOff ? Consts.TintOnSurfaceCss : bfg.foreground?.toString() ?? Consts.ThemeSecondaryTextColorVar
         );
         this.style.setProperty(
             '--hue-switch-handle-color',

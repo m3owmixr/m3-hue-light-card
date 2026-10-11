@@ -18,6 +18,11 @@ export enum SliderType {
     Mushroom = 'mushroom'
 }
 
+export enum TintType {
+    Harmonized = 'harmonized',
+    Full = 'full'
+}
+
 export enum ClickAction {
     Default = 'default',
     NoAction = 'none',
@@ -248,6 +253,7 @@ export interface HueLikeLightCardConfigInterface extends HueLikeLightCardEntityC
     readonly showSwitch?: boolean;
     readonly switchOnScene?: string;
     readonly slider?: string | SliderType;
+    readonly tint?: string | TintType;
     readonly scenes?: (string | SceneConfig)[];
     readonly sceneOrder?: SceneOrder;
     readonly sceneProvider?: MaybeArray<string | SceneProvider>;

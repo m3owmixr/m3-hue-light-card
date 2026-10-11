@@ -112,9 +112,13 @@ export class ViewUtils {
      * @param offBackground background used when all lights are off (null can be passed, and if used, null bg and fg will be returned)
      * @param assumeShadow If turned off, calculates foreground for max brightness (noShadow).
      * @param defaultColor Default color, if light does not provide his color.
+     * @param tintSurface When set (tint: harmonized), the light colors are mixed into this surface before the foreground is calculated.
      */
-    public static calculateBackAndForeground(ctrl: ILightContainer, offBackground: Background | null, assumeShadow = true, defaultColor: Background | null = offBackground) {
-        const currentBackground = ctrl.isOff() ? offBackground : (ctrl.getBackground() || defaultColor || offBackground);
+    public static calculateBackAndForeground(ctrl: ILightContainer, offBackground: Background | null, assumeShadow = true, defaultColor: Background | null = offBackground, tintSurface: Color | null = null) {
+        let currentBackground = ctrl.isOff() ? offBackground : (ctrl.getBackground() || defaultColor || offBackground);
+        if (tintSurface && ctrl.isOn() && currentBackground && currentBackground !== offBackground) {
+            currentBackground = currentBackground.mixInto(tintSurface, ViewUtils.harmonizedTintAmount(ctrl.brightnessValue));
+        }
 
         let foreground: Color | null;
         if (currentBackground == null) {
@@ -129,6 +133,15 @@ export class ViewUtils {
             background: currentBackground,
             foreground: foreground
         };
+    }
+
+    /**
+     * tint: harmonized - share of the light color mixed into the theme surface for given brightness (0-100).
+     * Dim lights blend less of their color in, so the card dims with the light without the dark shadow.
+     */
+    public static harmonizedTintAmount(brightness: number): number {
+        const b = Math.min(100, Math.max(0, brightness)) / 100;
+        return Consts.HarmonizedTintAmountMin + (Consts.HarmonizedTintAmount - Consts.HarmonizedTintAmountMin) * b;
     }
 
     /**
@@ -175,9 +188,15 @@ export class ViewUtils {
     /**
      * Calculates default shadow for passed element, using passed ILightContainer state and config.
      */
-    public static calculateDefaultShadow(element: Element, ctrl: ILightContainer, useOffShadow: boolean): string {
+    /**
+     * @param brightnessShadow When false (tint: harmonized), no dark inset shadow is drawn for the brightness.
+     */
+    public static calculateDefaultShadow(element: Element, ctrl: ILightContainer, useOffShadow: boolean, brightnessShadow = true): string {
         if (ctrl.isOff())
             return useOffShadow ? 'inset 0px 0px 10px rgba(0,0,0,0.2)' : '0px 0px 0px white';
+
+        if (!brightnessShadow)
+            return '0px 0px 0px transparent';
 
         const card = element;
         if (!card || !card.clientHeight)

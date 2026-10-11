@@ -1,5 +1,6 @@
 import { applyThemesOnElement, Themes } from 'custom-card-helpers';
 import { HueDialog } from '../controls/dialog';
+import { Color } from '../core/colors/color';
 import { Consts } from './consts';
 
 /**
@@ -52,6 +53,27 @@ export class ThemeHelper {
             '--ha-dialog-surface-background',
             `var(${hueBgColorVariable}, ${Consts.ThemeCardBackgroundVar})`
         );
+    }
+
+    /**
+     * Resolves the theme surface color used for tint: harmonized.
+     * @returns the first parseable color of Consts.TintSurfaceVariables, or null when none is available.
+     */
+    public static getTintSurface(element: HTMLElement): Color | null {
+        const style = getComputedStyle(element);
+        for (const variable of Consts.TintSurfaceVariables) {
+            const value = style.getPropertyValue(variable).trim();
+            if (!value)
+                continue;
+
+            try {
+                return new Color(value);
+            }
+            catch {
+                // not a plain color (e.g. a gradient or image), try the next one
+            }
+        }
+        return null;
     }
 
     /** 

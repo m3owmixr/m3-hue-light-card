@@ -53,7 +53,8 @@ export default cli => {
         },
         plugins: [
             json({compact:true}),
-            typescript(),
+            // clean: no rpt2 cache - in watch mode it went stale after multi-file edits and kept failing on types tsc accepts
+            typescript({ clean: true }),
             nodeResolve(),
             runServer && serve(serverOptions),
             !dev && terser()

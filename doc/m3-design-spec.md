@@ -44,8 +44,13 @@ When the card is off and untinted: on-track `--md-sys-color-primary`, on-handle 
 ## Tint (decision C)
 
 New option `tint: harmonized | full`, default **`harmonized`**.
-- `full` uses today's saturated Hue colors and gradient, unchanged.
-- `harmonized` mixes each light color into `--md-sys-color-surface-container-high` (starting point: 45% light color, tune by eye). The mix happens **in JS with the card's existing `Color` classes**, not CSS `color-mix()`, so the readable-text color is computed from the actual mixed color.
+- `full` uses today's saturated Hue colors and gradient, unchanged, including the dark brightness shadow.
+- `harmonized` mixes each light color into `--md-sys-color-surface-container-high` (fallbacks: `--ha-card-background`, `--card-background-color`). The mix happens **in JS with the card's existing `Color` classes**, not CSS `color-mix()`, so the readable-text color is computed from the actual mixed color.
+  - **Brightness is shown by the mix strength, not the dark shadow:** 15% light color at the lowest brightness up to 45% at full brightness. The dark inset shadow made light-theme cards look muddy. Because there's no shadow, the foreground follows the mixed color only (no "white below 50%" rule).
+  - **Off cards** use the theme surface with on-surface text, applied as CSS variables (not parsed in JS), unless `offColor` is set.
+  - If no theme surface can be resolved, the card falls back to `full`.
+
+_Implemented 2026-10-10 (step 5c)._
 
 ## Brightness slider (M3 Expressive, XS size; decision A)
 

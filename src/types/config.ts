@@ -6,7 +6,7 @@ import { HomeAssistant } from 'custom-card-helpers';
 import { removeDuplicates } from './extensions';
 import { ColorExtended } from '../core/colors/color-extended';
 import { HassTextTemplate } from '../core/hass-text-template';
-import { ClickAction, ClickActionData, HueLikeLightCardEntityConfigInterface, HueLikeLightCardConfigInterface, KnownIconSize, SceneConfig, SceneOrder, SceneProvider, SliderType } from './types-config';
+import { ClickAction, ClickActionData, HueLikeLightCardEntityConfigInterface, HueLikeLightCardConfigInterface, KnownIconSize, SceneConfig, SceneOrder, SceneProvider, SliderType, TintType } from './types-config';
 import { HassSearchLightsResult, HassWsClient } from '../core/hass-ws-client';
 import { LightingData, PresetConfig } from './types-hue-preset';
 import { MaybeArray } from './types-helpers';
@@ -102,6 +102,7 @@ export class HueLikeLightCardConfig extends HueLikeLightCardEntityConfig impleme
         this.showSwitch = HueLikeLightCardConfig.getBoolean(plainConfig.showSwitch, true);
         this.switchOnScene = plainConfig.switchOnScene;
         this.slider = HueLikeLightCardConfig.getSliderType(plainConfig.slider);
+        this.tint = HueLikeLightCardConfig.getTintType(plainConfig.tint);
         this._scenes = HueLikeLightCardConfig.getScenesArray(plainConfig.scenes);
         this.sceneOrder = HueLikeLightCardConfig.getSceneOrder(plainConfig.sceneOrder);
         this.sceneProvider = HueLikeLightCardConfig.getSceneProviders(plainConfig.sceneProvider);
@@ -145,6 +146,16 @@ export class HueLikeLightCardConfig extends HueLikeLightCardEntityConfig impleme
         if (plain == null)
             return def;
         return !!plain;
+    }
+
+    /**
+     * @returns TintType valid enum, harmonized for empty or throws exception.
+     */
+    private static getTintType(plain: TintType | string | undefined): TintType {
+        if (!plain)
+            return TintType.Harmonized;
+
+        return HueLikeLightCardConfig.tryParseEnum<TintType>(TintType, plain, 'Tint');
     }
 
     /**
@@ -288,6 +299,7 @@ export class HueLikeLightCardConfig extends HueLikeLightCardEntityConfig impleme
     public readonly showSwitch: boolean;
     public readonly switchOnScene?: string;
     public readonly slider: SliderType;
+    public readonly tint: TintType;
     public get scenes() {
         return this._scenes || [];
     }

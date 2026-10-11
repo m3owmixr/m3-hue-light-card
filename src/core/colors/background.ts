@@ -57,6 +57,13 @@ export class Background {
     }
 
     /**
+     * Returns a new background with @param amount (0..1) of each of its colors mixed into @param surface.
+     */
+    public mixInto(surface: Color, amount: number): Background {
+        return new Background(this._colors.map(c => surface.mix(c, amount)));
+    }
+
+    /**
      * The last (rightmost in the gradient) color of this background.
      */
     public get lastColor(): Color {
