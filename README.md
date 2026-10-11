@@ -207,7 +207,7 @@ Some of these options may not be in the latest version. Please always check the 
     <td><code>tint</code></td>
     <td><code>harmonized</code> | <code>full</code></td>
     <td>no</td>
-    <td>M3 1.0.0</td>
+    <td>M3 2.0.0</td>
     <td><code>harmonized</code></td>
     <td><code>harmonized</code> blends the light color into the theme surface (<code>--md-sys-color-surface-container-high</code>), shows brightness by tint strength, and uses the theme surface when off. <code>full</code> keeps the original saturated colors and brightness shadow.</td>
   </tr>
@@ -499,7 +499,7 @@ You can set size of the icon on hue card. Possibilities are:
     - ... you got it
 
 ## Slider Type
-*Since version 1.5.0 (M3 slider since M3 1.0.0)*
+*Since version 1.5.0 (M3 slider since M3 2.0.0)*
 
 You can set slider to one of the following options:
 - `default` - the M3 brightness slider
