@@ -1,6 +1,6 @@
 {
     "name": "m3-hue-light-card",
-    "version": "v1.11.0",
+    "version": "v1.0.0",
     "description": "M3 Hue Light Card (fork of Hue-Like Light Card by Gh61)",
     "keywords": [
         "home-assistant",
