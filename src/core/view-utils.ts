@@ -11,6 +11,7 @@ import { Color } from './colors/color';
 import { HaIcon, IHassWindow } from '../types/types-hass';
 import { SliderType } from '../types/types-config';
 import { M3Slider } from '../controls/m3-slider';
+import { M3Switch } from '../controls/m3-switch';
 
 export class ViewUtils {
 
@@ -30,6 +31,21 @@ export class ViewUtils {
             style=${styleMap(styles)}
             @change=${(ev: Event) => ViewUtils.toggled(ev, ctrl, onChange, switchOnScene)}
         ></ha-switch>`;
+    }
+
+    /**
+     * Creates M3 switch for given ILightContainer (used by the collapsed card).
+     * @param onChange Be careful - this function is called on different scope, better pack your function to arrow call.
+     */
+    public static createM3Switch(ctrl: ILightContainer, onChange: Action, switchOnScene?: string) {
+        // tinted = the card is lit, so the switch is drawn in the card's foreground color
+        return html`
+            <${unsafeStatic(M3Switch.ElementName)}
+                class="m3-switch ${ctrl.isOn() ? 'tinted' : ''}"
+                .checked=${ctrl.isOn()}
+                .disabled=${ctrl.isUnavailable()}
+                @change=${(ev: Event) => ViewUtils.toggled(ev, ctrl, onChange, switchOnScene)}
+            ></${unsafeStatic(M3Switch.ElementName)}>`;
     }
 
     /**

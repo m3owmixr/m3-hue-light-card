@@ -56,6 +56,13 @@ export class Background {
         return forLight > this._colors.length / 4 ? light : dark;
     }
 
+    /**
+     * The last (rightmost in the gradient) color of this background.
+     */
+    public get lastColor(): Color {
+        return this._colors[this._colors.length - 1];
+    }
+
     public toString(): string {
         if (this._colors.length == 1)
             return this._colors[0].toString();

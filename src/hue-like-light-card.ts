@@ -311,10 +311,14 @@ export class HueLikeLightCard extends IdLitElement implements LovelaceCard {
         line-clamp: 2;
         overflow: hidden;
     }
-    ha-switch
+    .m3-switch.tinted
     {
-        /* from HA 2026.5 - compensate for inner label margin */
-        margin-inline-end: -0.5em;
+        /* on a lit card: track in the readable foreground color, handle in the card's own color behind it */
+        --m3-switch-selected-track: var(--hue-text-color);
+        --m3-switch-selected-handle: var(--hue-switch-handle-color);
+        --m3-switch-unselected-track: transparent;
+        --m3-switch-unselected-outline: var(--hue-text-color);
+        --m3-switch-unselected-handle: var(--hue-text-color);
     }
     .brightness-slider
     {
@@ -433,6 +437,10 @@ export class HueLikeLightCard extends IdLitElement implements LovelaceCard {
             bfg.foreground?.toString() ?? Consts.ThemeSecondaryTextColorVar
         );
         this.style.setProperty(
+            '--hue-switch-handle-color',
+            bfg.background?.lastColor.toString() ?? Consts.ThemeCardBackgroundVar
+        );
+        this.style.setProperty(
             '--ha-card-box-shadow',
             shadow
         );
@@ -491,7 +499,7 @@ export class HueLikeLightCard extends IdLitElement implements LovelaceCard {
                         <div class="desc">${description}</div>
                     </div>
                 </div>
-                ${showSwitch ? ViewUtils.createSwitch(this._ctrl, this.onChangeHandler, this._config.switchOnScene) : nothing}
+                ${showSwitch ? ViewUtils.createM3Switch(this._ctrl, this.onChangeHandler, this._config.switchOnScene) : nothing}
             </div>
             ${ViewUtils.createSlider(this._ctrl, this._config, this.onChangeHandler)}
         </ha-card>`;
