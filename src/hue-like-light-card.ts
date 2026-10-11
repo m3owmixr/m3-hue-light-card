@@ -225,12 +225,13 @@ export class HueLikeLightCard extends IdLitElement implements LovelaceCard {
     public static override styles = css`
     ha-card
     {
-        min-height:80px;
         background:var(--hue-background);
         position:relative;
         box-shadow:var(--hue-box-shadow), var(--ha-default-shadow);
         background-origin: border-box;
-        --hue-card-margin: 14px;
+        /* M3 extra-large shape */
+        border-radius: var(--md-sys-shape-corner-extra-large, 28px);
+        --hue-card-margin: 16px;
     }
     ha-card.new-borders
     {
@@ -246,45 +247,52 @@ export class HueLikeLightCard extends IdLitElement implements LovelaceCard {
     ha-card div.main-info
     {
         display: flex;
+        align-items: center;
         justify-content: space-between;
         padding: var(--hue-card-margin);
-        padding-bottom: 0;
     }
     ha-card div.tap-area
     {
         flex-grow:1;
         min-width: 0;
-        /* height = card(80) - slider(32) - border(2) */
-        height: calc(46px - var(--hue-card-margin));
+        min-height: 40px;
         cursor: pointer;
         display: flex;
         align-items: center;
+        gap: 16px;
     }
     ha-icon
     {
+        /* 40px tonal container (M3 list-item leading element), 24px glyph at the default icon size */
         flex-shrink: 0;
-        display:inline-block;
-        --mdc-icon-size: calc(24px * var(--hue-icon-size, ${Consts.IconSize[KnownIconSize.Original]}));
-        width: 70px;
-        margin-left: calc(-1* var(--hue-card-margin));
-        text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        --mdc-icon-size: calc(24px * var(--hue-icon-size, ${Consts.IconSize[KnownIconSize.Original]}) / ${Consts.IconSize[KnownIconSize.Original]});
         color:var(--hue-text-color);
+        background: color-mix(in srgb, var(--hue-text-color) 12%, transparent);
         transition:${unsafeCSS(Consts.TransitionDefault)};
     }
     .text-area{
         flex-grow: 1;
         min-width: 0;
-        line-height:normal;
+        margin-right: 12px;
         color:var(--hue-text-color);
         transition:${unsafeCSS(Consts.TransitionDefault)};
     }
     .text-area.no-switch{
-        margin-right:10px;
+        margin-right: 0;
     }
     .text-area h2
     {
-        font-size:18px;
-        font-weight:500;
+        /* M3 title-medium */
+        font-size: var(--md-sys-typescale-title-medium-size, 16px);
+        line-height: var(--md-sys-typescale-title-medium-line-height, 24px);
+        font-weight: var(--md-sys-typescale-title-medium-weight, 500);
+        letter-spacing: var(--md-sys-typescale-title-medium-tracking, 0.15px);
         text-overflow:ellipsis;
         overflow:hidden;
         white-space:nowrap;
@@ -292,7 +300,11 @@ export class HueLikeLightCard extends IdLitElement implements LovelaceCard {
     }
     .text-area .desc
     {
-        font-size:13px;
+        /* M3 body-medium */
+        font-size: var(--md-sys-typescale-body-medium-size, 14px);
+        line-height: var(--md-sys-typescale-body-medium-line-height, 20px);
+        font-weight: var(--md-sys-typescale-body-medium-weight, 400);
+        opacity: 0.8;
         display: -webkit-box;
         -webkit-box-orient: vertical;
         -webkit-line-clamp: 2;
@@ -306,9 +318,11 @@ export class HueLikeLightCard extends IdLitElement implements LovelaceCard {
     }
     .brightness-slider
     {
-        /* full card padding below, so the 44px handle clears the rounded corners.
+        /* 8px below the 48px row leaves 24px above and below the 16px track, with the handle ~10px clear of the rounded corners.
            padding, not margin: a bottom margin collapses through ha-card when it has no border */
-        padding: 0 var(--hue-card-margin) var(--hue-card-margin);
+        padding: 0 var(--hue-card-margin) 8px;
+        /* main-info already has full bottom padding; pull the slider up to leave an 8px gap */
+        margin-top: calc(8px - var(--hue-card-margin));
     }
     .brightness-slider.tinted
     {
