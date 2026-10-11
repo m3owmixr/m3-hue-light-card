@@ -64,6 +64,7 @@ jobs:
 
     - name: Generate changelog
       id: commits_changelog
+      continue-on-error: true # fails when there's no previous release (first release); don't block the release
       uses: jaywcjlove/changelog-generator@v2.4.0 # version 2.2.5 is causing an error (https://github.com/jaywcjlove/changelog-generator/issues/129)
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
@@ -84,6 +85,7 @@ jobs:
 
     - name: Generate Issues Changelog
       id: issues_changelog
+      continue-on-error: true # fails when there's no previous release (first release); don't block the release
       uses: heinrichreimer/action-github-changelog-generator@v2.3 # version 2.4 creates malformed changelog
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
