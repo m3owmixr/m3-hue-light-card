@@ -2,7 +2,7 @@ import { Color } from '../core/colors/color';
 import { KnownIconSize } from './types-config';
 
 export class Consts {
-    public static readonly Version = 'v1.0.0';
+    public static readonly Version = 'v2.0.0';
     public static readonly Dev = true;
     // '-m3' keeps every inner element unique, so this fork can be installed alongside the original card
     public static readonly ElementPostfix = Consts.Dev ? '-m3-test' : '-m3';
