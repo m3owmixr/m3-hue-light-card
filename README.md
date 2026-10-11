@@ -1,17 +1,29 @@
 # M3 Hue Light Card
 
-> **This is a fork** of [Hue-Like Light Card](https://github.com/Gh61/lovelace-hue-like-light-card) by **Gh61 (Tom Zenkner)**. It restyles the card for **Material 3**: M3 tokens, an M3 wave slider, and shapes and typography. Everything people like about the original stays: the whole card tinted by the light's color(s), the Hue-style scene dialog with [scene_presets](https://github.com/Hypfer/hass-scene_presets) support, and one card controlling several lights.
+> **This is a fork** of [Hue-Like Light Card](https://github.com/Gh61/lovelace-hue-like-light-card) by **Gh61 (Tom Zenkner)**, restyled for **Material 3**. Everything people like about the original stays: the whole card tinted by the light's color(s), the Hue-style scene dialog with [scene_presets](https://github.com/Hypfer/hass-scene_presets) support, and one card controlling several lights.
 >
+> **What's different from the original (collapsed card):**
+> - **M3 brightness slider**: flat M3 Expressive slider (16px track, slim handle, stop dot), drawn in the card's text color so it never clashes with the light color. No Mushroom dependency.
+> - **M3 switch**: custom 52×32 switch; on a lit card the track uses the text color and the handle picks up the light color.
+> - **M3 shape and type**: 28px corners, 16px padding, M3 title/body type scale, and the icon in a 40px tonal circle.
+> - **`tint: harmonized`** (default): blends the light color into your theme's surface color for a softer Material You look, with brightness shown by tint strength. Off cards use your theme surface. Works in light and dark themes. Use `tint: full` for the original saturated Hue colors.
+> - Reads [Material You](https://github.com/Nerwyn/material-you-utilities) `--md-sys-*` tokens when present and falls back to standard Home Assistant theme variables.
+>
+> **Coming next:**
+> - **Wavy slider** as an option (`slider_style: wavy`), based on the M3 Expressive wavy style.
+> - **Scene dialog restyle**: the Hue scene screen still uses the original look for now.
+>
+> **Details:**
 > - Card type: `custom:m3-hue-light-card`. It can be installed alongside the original card.
 > - API hash prefix: `#m3_hue_card:` (the original uses `#hue_card:`).
 > - License: LGPL-2.1, same as upstream. See [LICENSE](LICENSE) and [NOTICE](NOTICE).
 > - Slider design inspired by [M3 Cards](https://github.com/j0sp0r/m3-cards) by j0sp0r (MIT).
 >
-> **Work in progress.** The documentation below is the upstream README. Where it says `hue-like-light-card`, use `m3-hue-light-card`.
+> The rest of this page is the upstream documentation, updated where the fork behaves differently. Where an example says `hue-like-light-card`, use `m3-hue-light-card`.
 
 ---
 
-[![hacs_badge](https://img.shields.io/badge/HACS-Default-41BDF5.svg)](https://github.com/hacs/integration) [![Tests](https://github.com/Gh61/lovelace-hue-like-light-card/actions/workflows/validation.yml/badge.svg)](https://github.com/Gh61/lovelace-hue-like-light-card/actions/workflows/validation.yml) [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.me/paygh61/) ![Downloads](https://img.shields.io/github/downloads/Gh61/lovelace-hue-like-light-card/total.svg)
+[![hacs_badge](https://img.shields.io/badge/HACS-Custom-41BDF5.svg)](https://github.com/hacs/integration) [![Tests](https://github.com/m3owmixr/m3-hue-light-card/actions/workflows/validation.yml/badge.svg)](https://github.com/m3owmixr/m3-hue-light-card/actions/workflows/validation.yml) ![Downloads](https://img.shields.io/github/downloads/m3owmixr/m3-hue-light-card/total.svg)
 
 
 # Hue-Like Light Card for Home Assistant
@@ -43,25 +55,24 @@ Also this card will detect these icons installed and will use them prior to HA i
 
 ## Installation
 
-### HACS
+### HACS (custom repository)
 
 - Open HACS
-- Go to "Frontend" section
-- Click button with "+" icon
-- Search for "Hue-Like Light Card"
-- Install repository in HACS
+- Click the three-dot menu (top right) and choose **Custom repositories**
+- Repository: `https://github.com/m3owmixr/m3-hue-light-card`, Type: **Dashboard**
+- Search for "M3 Hue Light Card" and download it
 - Refresh your browser
 
 ### Manual
 
-- Download `hue-like-light-card.js` file from the [latest release](https://github.com/Gh61/lovelace-hue-like-light-card/releases/latest)
-- Save downloaded file somewhere in `<ha config>/www/` directory, e.g. `/config/www/custom_lovelace/hue-like-light-card.js`
-- Add saved file to [Lovelace resources](https://my.home-assistant.io/redirect/lovelace_resources/)
+- Download `m3-hue-light-card.js` from the [latest release](https://github.com/m3owmixr/m3-hue-light-card/releases/latest)
+- Save it somewhere in `<ha config>/www/`, e.g. `/config/www/custom_lovelace/m3-hue-light-card.js`
+- Add the file to [Dashboard resources](https://my.home-assistant.io/redirect/lovelace_resources/)
   ```yaml
-  url: /local/custom_lovelace/hue-like-light-card.js
+  url: /local/custom_lovelace/m3-hue-light-card.js
   type: module
   ```
-- Restart HA if you had to create `www` directory
+- Restart HA if you had to create the `www` directory
 - Refresh your browser
 
 ## Configuration
@@ -190,7 +201,15 @@ Some of these options may not be in the latest version. Please always check the 
     <td>no</td>
     <td>1.5.0</td>
     <td><code>default</code></td>
-    <td>You can choose between diferent sliders or hide the slider.</td>
+    <td>Show the M3 brightness slider or hide it.</td>
+  </tr>
+  <tr>
+    <td><code>tint</code></td>
+    <td><code>harmonized</code> | <code>full</code></td>
+    <td>no</td>
+    <td>M3 1.0.0</td>
+    <td><code>harmonized</code></td>
+    <td><code>harmonized</code> blends the light color into the theme surface (<code>--md-sys-color-surface-container-high</code>), shows brightness by tint strength, and uses the theme surface when off. <code>full</code> keeps the original saturated colors and brightness shadow.</td>
   </tr>
   <tr>
     <td><code>scenes</code></td>
@@ -238,7 +257,7 @@ Some of these options may not be in the latest version. Please always check the 
     <td><a href="#colorextended">ColorExtended</a></td>
     <td>no</td>
     <td>1.0.0</td>
-    <td><code>'#666'</code><br/>(<code>'#363636'</code> for <a href="#hue-screen">Hue Screen</a>)</td>
+    <td><code>'#666'</code><br/>(<code>'#363636'</code> for <a href="#hue-screen">Hue Screen</a>)<br/>With <code>tint: harmonized</code>: theme surface</td>
     <td>
       The color of the pane, when all lights are off.
       When set, also used in <a href="#hue-screen">Hue Screen</a> header (recommended setting also <code>hueScreenBgColor</code> accordingly).
@@ -480,31 +499,27 @@ You can set size of the icon on hue card. Possibilities are:
     - ... you got it
 
 ## Slider Type
-*Since version 1.5.0*
+*Since version 1.5.0 (M3 slider since M3 1.0.0)*
 
-You can set slider to on of following options:
-- `default` - will use default slider
-- `none` - will hide the slider entirely (same state, as if the light does not have brightness control)
-- `mushroom` - will use [Mushroom slider](https://github.com/piitaya/lovelace-mushroom).
+You can set slider to one of the following options:
+- `default` - the M3 brightness slider
+- `none` - hides the slider entirely (same as if the light did not have brightness control)
+- `mushroom` - kept for older configs; shows the M3 slider. [Mushroom](https://github.com/piitaya/lovelace-mushroom) is no longer needed.
 
-### Mushroom slider
-[Mushroom](https://github.com/piitaya/lovelace-mushroom) must be installed for this option to work.
+The slider follows the M3 Expressive spec: 16px track, 4px handle that narrows while dragging, and a stop dot at the end. Brightness updates are sent while you drag (about 5 per second). It also works with the keyboard: arrow keys change brightness by 5%, with Shift by 1%, and Home/End jump to the ends.
 
-![Mushroom usage](/doc/mushroom-screen1.png)
+On a lit card the slider is drawn in the card's text color. You can override the colors with [Card mod](https://github.com/thomasloven/lovelace-card-mod):
 
-You can customize properties of mushroom slider using [Card mod](https://github.com/thomasloven/lovelace-card-mod):
-
-![Mushroom customization](/doc/mushroom-screen2.png)
 ```yaml
-type: custom:hue-like-light-card
+type: custom:m3-hue-light-card
 entity: light.office
-slider: mushroom
-theme: synthwave
 card_mod:
   style: |
     .brightness-slider {
-      --mush-control-height: 42px;
-      --slider-color: white;
+      --m3-slider-active-color: white;
+      --m3-slider-inactive-color: rgba(255, 255, 255, 0.24);
+      --m3-slider-handle-color: white;
+      --m3-slider-stop-color: rgba(255, 255, 255, 0.6);
     }
 ```
 
