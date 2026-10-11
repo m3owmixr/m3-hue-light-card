@@ -1,6 +1,6 @@
 # M3 Hue Light Card
 
-> **This is a fork** of [Hue-Like Light Card](https://github.com/Gh61/lovelace-hue-like-light-card) by **Gh61 (Tom Zenkner)**. It restyles the card for **Material 3**: M3 tokens, an M3 wave slider, and shapes and typography. Everything people like about the original stays: the whole card tinted by the light's colour(s), the Hue-style scene dialog with [scene_presets](https://github.com/Hypfer/hass-scene_presets) support, and one card controlling several lights.
+> **This is a fork** of [Hue-Like Light Card](https://github.com/Gh61/lovelace-hue-like-light-card) by **Gh61 (Tom Zenkner)**. It restyles the card for **Material 3**: M3 tokens, an M3 wave slider, and shapes and typography. Everything people like about the original stays: the whole card tinted by the light's color(s), the Hue-style scene dialog with [scene_presets](https://github.com/Hypfer/hass-scene_presets) support, and one card controlling several lights.
 >
 > - Card type: `custom:m3-hue-light-card`. It can be installed alongside the original card.
 > - API hash prefix: `#m3_hue_card:` (the original uses `#hue_card:`).

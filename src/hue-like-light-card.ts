@@ -306,13 +306,16 @@ export class HueLikeLightCard extends IdLitElement implements LovelaceCard {
     }
     .brightness-slider
     {
-        width:100%;
+        /* full card padding below, so the 44px handle clears the rounded corners.
+           padding, not margin: a bottom margin collapses through ha-card when it has no border */
+        padding: 0 var(--hue-card-margin) var(--hue-card-margin);
     }
-    ha-slider.brightness-slider
+    .brightness-slider.tinted
     {
-        /*since HA 2025.10*/
-        width: calc(100% - 2 * var(--hue-card-margin));
-        margin: var(--hue-card-margin);
+        /* on a lit card the slider uses the card's readable foreground color, not the theme accent */
+        --m3-slider-active-color: var(--hue-text-color);
+        --m3-slider-inactive-color: color-mix(in srgb, var(--hue-text-color) 24%, transparent);
+        --m3-slider-stop-color: color-mix(in srgb, var(--hue-text-color) 60%, transparent);
     }
     ha-alert{
         display:flex;

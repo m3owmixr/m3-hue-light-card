@@ -398,12 +398,12 @@ export class HueDialog extends IdLitElement {
         margin-inline-end: -0.5em;
     }
     .hue-heading .brightness-slider {
-        width: 100%;
+        padding: 0 18px 6px;
     }
-    .hue-heading ha-slider.brightness-slider {
-        width: calc(100% - 36px);
-        margin: 18px;
-        margin-top: 12px;
+    .hue-heading .brightness-slider.tinted {
+        --m3-slider-active-color: var(--hue-heading-text-color);
+        --m3-slider-inactive-color: color-mix(in srgb, var(--hue-heading-text-color) 24%, transparent);
+        --m3-slider-stop-color: color-mix(in srgb, var(--hue-heading-text-color) 60%, transparent);
     }
     /* Disable the bottom border radius */
     /* in default styles: --ha-border-radius=0 in this case */

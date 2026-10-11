@@ -10,7 +10,7 @@ import { Background } from './colors/background';
 import { Color } from './colors/color';
 import { HaIcon, IHassWindow } from '../types/types-hass';
 import { SliderType } from '../types/types-config';
-import { HueMushroomSliderContainer } from '../controls/mushroom-slider-container';
+import { M3Slider } from '../controls/m3-slider';
 
 export class ViewUtils {
 
@@ -28,7 +28,7 @@ export class ViewUtils {
             .disabled=${ctrl.isUnavailable()}
             .haptic=true
             style=${styleMap(styles)}
-            @change=${(ev: Event) => ViewUtils.changed(ev, false, ctrl, onChange, switchOnScene)}
+            @change=${(ev: Event) => ViewUtils.toggled(ev, ctrl, onChange, switchOnScene)}
         ></ha-switch>`;
     }
 
@@ -46,56 +46,42 @@ export class ViewUtils {
         const max = 100;
         const step = 1;
 
-        if (config.slider == SliderType.Mushroom) {
-            return html`
-                <${unsafeStatic(HueMushroomSliderContainer.ElementName)}
-                    class="brightness-slider"
-                    .min=${min}
-                    .max=${max}
-                    .step=${step}
-                    .disabled=${config.allowZero ? ctrl.isUnavailable() : ctrl.isOff()}
-                    .value=${ctrl.brightnessValue}
-                    .showActive=${true}
-                    @change=${(ev: Event) => ViewUtils.changed(ev, true, ctrl, onChange)}
-                />`;
-
-            // @current-change=${this.onCurrentChange}
-        }
-
+        // slider: default and slider: mushroom both map to the M3 slider
+        // tinted = the card is lit, so the slider is drawn in the card's foreground color
         return html`
-        <ha-slider pin ignore-bar-touch
-            class="brightness-slider"
-            .min=${min}
-            .max=${max}
-            .step=${step}
-            .disabled=${config.allowZero ? ctrl.isUnavailable() : ctrl.isOff()}
-            .value=${ctrl.brightnessValue}
-            @change=${(ev: Event) => ViewUtils.changed(ev, true, ctrl, onChange)}
-        ></ha-slider>`;
+            <${unsafeStatic(M3Slider.ElementName)}
+                class="brightness-slider ${ctrl.isOn() ? 'tinted' : ''}"
+                .min=${min}
+                .max=${max}
+                .step=${step}
+                .disabled=${config.allowZero ? ctrl.isUnavailable() : ctrl.isOff()}
+                .value=${ctrl.brightnessValue}
+                @value-changing=${(ev: CustomEvent<{ value: number }>) => ViewUtils.brightnessChanging(ev.detail.value, ctrl)}
+                @change=${(ev: CustomEvent<{ value: number }>) => ViewUtils.brightnessChanged(ev.detail.value, ctrl, onChange)}
+            ></${unsafeStatic(M3Slider.ElementName)}>`;
     }
 
-    private static changed(ev: Event, isSlider: boolean, ctrl: ILightContainer, onChange: Action, switchOnScene?: string) {
+    private static brightnessChanging(value: number, ctrl: ILightContainer) {
+        // card re-renders itself through the controller's property-changed notification
+        ctrl.brightnessValue = value;
+    }
 
-        // TODO: try to update on sliding (use throttle) not only on change. (https://www.webcomponents.org/element/@polymer/paper-slider/elements/paper-slider#events)
+    private static brightnessChanged(value: number, ctrl: ILightContainer, onChange: Action) {
+        ctrl.brightnessValue = value;
+        onChange();
+    }
 
+    private static toggled(ev: Event, ctrl: ILightContainer, onChange: Action, switchOnScene?: string) {
         const target = ev.target;
         if (!target)
             return;
 
-        if (isSlider) {
-            const value = (target as HTMLInputElement).value;
-            if (value != null) {
-                ctrl.brightnessValue = parseInt(value);
-            }
+        const checked = (target as HTMLInputElement).checked;
+        if (checked) {
+            ctrl.turnOn(switchOnScene);
         }
-        else { // isToggle
-            const checked = (target as HTMLInputElement).checked;
-            if (checked) {
-                ctrl.turnOn(switchOnScene);
-            }
-            else {
-                ctrl.turnOff();
-            }
+        else {
+            ctrl.turnOff();
         }
 
         // update styles
