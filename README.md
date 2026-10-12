@@ -109,6 +109,20 @@ entity: light.floor_lamp
 tint: full
 ```
 
+## Wavy slider
+
+`slider: wavy` draws the active part of the brightness slider as a gently moving wave, in the M3 Expressive style. The wave stands still when your system's reduced-motion setting is on.
+
+<p>
+  <img alt="slider: wavy, with tint: harmonized (top) and tint: full (bottom)" src="https://github.com/m3owmixr/m3-hue-light-card/raw/main/doc/m3-slider-wavy.png" width="400" />
+</p>
+
+```yaml
+type: custom:m3-hue-light-card
+entity: light.floor_lamp
+slider: wavy
+```
+
 ## Scenes
 
 Tap the card to open the scene screen, where you can pick a scene or change each light's color and brightness. The card finds scenes from the areas its lights are in, or you can list your own:
