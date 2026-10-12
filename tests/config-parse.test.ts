@@ -1,6 +1,6 @@
 import { HueLikeLightCardConfig } from '../src/types/config';
 import { Consts } from '../src/types/consts';
-import { HueLikeLightCardConfigInterface, KnownIconSize, SceneProvider } from '../src/types/types-config';
+import { HueLikeLightCardConfigInterface, KnownIconSize, SceneProvider, SliderType } from '../src/types/types-config';
 
 describe('Config parse', () => {
     it('parse default config', () => {
@@ -25,6 +25,11 @@ describe('Config parse', () => {
     it('parse hueBorders opt-in', () => {
         const config = new HueLikeLightCardConfig({ entity: 'light.test', hueBorders: true });
         expect(config.hueBorders).toBe(true);
+    });
+
+    it('parse wavy slider', () => {
+        const config = new HueLikeLightCardConfig({ entity: 'light.test', slider: 'wavy' });
+        expect(config.slider).toBe(SliderType.Wavy);
     });
 
     it('parse sceneProvider', () => {

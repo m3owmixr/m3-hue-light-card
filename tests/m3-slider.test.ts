@@ -79,3 +79,42 @@ describe('Throttler', () => {
         expect(calls).toEqual([1, 4]);
     });
 });
+
+describe('M3SliderMath wave', () => {
+    const points = (d: string) => d.replace(/^M/, '').split(' L').map(p => p.trim().split(' ').map(Number));
+
+    it('returns an empty path when there is no room', () => {
+        expect(M3SliderMath.wavePath(10, 10, 28, 3.5, 24, 0)).toBe('');
+        expect(M3SliderMath.wavePath(10, 4, 28, 3.5, 24, 0)).toBe('');
+    });
+
+    it('draws a sine wave from x0 to x1 around cy', () => {
+        const pts = points(M3SliderMath.wavePath(3, 100, 28, 3.5, 24, 0));
+
+        expect(pts[0][0]).toBe(3);
+        expect(pts[pts.length - 1][0]).toBe(100);
+        for (const [, y] of pts) {
+            expect(y).toBeGreaterThanOrEqual(28 - 3.5);
+            expect(y).toBeLessThanOrEqual(28 + 3.5);
+        }
+        // x is absolute, so the wave doesn't shift when x0 changes: y(24) == cy, y(30) == crest
+        const at = (x: number) => pts.find(p => p[0] == x)![1];
+        expect(at(24)).toBeCloseTo(28, 1);
+        expect(at(30)).toBeCloseTo(28 + 3.5, 1);
+    });
+
+    it('moves the wave to the right as the phase grows', () => {
+        const quarter = Math.PI / 2;
+        const pts = points(M3SliderMath.wavePath(0, 60, 28, 3.5, 24, quarter));
+        const at = (x: number) => pts.find(p => p[0] == x)![1];
+        // the crest at x=6 moves a quarter wavelength right, to x=12
+        expect(at(12)).toBeCloseTo(28 + 3.5, 1);
+    });
+
+    it('computes where the active track ends', () => {
+        // track 210px, handle 6px, gap 6px: usable 204px
+        expect(M3SliderMath.activeTrackEnd(0.5, 210, 6, 6)).toBe(96);
+        expect(M3SliderMath.activeTrackEnd(0, 210, 6, 6)).toBe(0);
+        expect(M3SliderMath.activeTrackEnd(1, 210, 6, 6)).toBe(198);
+    });
+});

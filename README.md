@@ -16,7 +16,7 @@ A Home Assistant light card that takes on the color of your lights, styled for M
 ## Features
 
 - **Tinted by your lights.** The card takes on the color of its lights, blended with your theme. Several lights of different colors make a gradient.
-- **Material 3 controls.** A flat M3 brightness slider and switch, drawn in the card's text color so they never clash with the light color.
+- **Material 3 controls.** An M3 brightness slider (flat, or wavy with `slider: wavy`) and switch, drawn in the card's text color so they never clash with the light color.
 - **Hue-style scene screen.** Tap the card to pick scenes and adjust each light, including [Scene Presets](https://github.com/Hypfer/hass-scene_presets) support.
 - **One card, many lights.** Control a single light, a list, or a whole area, floor or label.
 - **Works with your theme.** Uses [Material You](https://github.com/Nerwyn/material-you-utilities) colors when available, and standard Home Assistant theme colors otherwise. Light and dark mode are both supported.
@@ -86,7 +86,7 @@ icon: mdi:sofa
 | `description` | lights-on summary | Line under the title. `false` hides it. |
 | `icon` | chosen automatically | Card icon |
 | `tint` | `harmonized` | `harmonized` or `full`. See [Tint](#tint). |
-| `slider` | `default` | `none` hides the brightness slider |
+| `slider` | `default` | `wavy` draws the active part as a moving wave; `none` hides the brightness slider |
 | `showSwitch` | `true` | `false` hides the on/off switch |
 | `allowZero` | `false` | `true` lets the slider turn the lights off at 0 |
 | `switchOnScene` | - | Scene to activate when you switch the card on |
@@ -184,7 +184,6 @@ tap_action:
 
 ## Coming next
 
-- **Wavy slider** as an option (`slider_style: wavy`), in the M3 Expressive style
 - **M3 scene screen** to match the card
 
 ## Credits and license

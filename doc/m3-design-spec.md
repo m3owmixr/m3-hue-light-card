@@ -54,7 +54,7 @@ _Implemented 2026-10-10 (step 5c)._
 
 ## Brightness slider (M3 Expressive, XS size; decision A)
 
-New option `slider_style: flat | wavy`, default **`flat`**.
+Set with the existing `slider` option: `slider: default` (flat) or `slider: wavy`. A separate `slider_style` key was planned but dropped, because it would overlap with `slider: none`.
 
 Sources: Material Components Android `Slider.md` (M3 Expressive defaults) and m3-cards `m3-light-card` (wavy variant).
 
@@ -78,6 +78,8 @@ Sources: Material Components Android `Slider.md` (M3 Expressive defaults) and m3
 - Use `touch-action: none` so dragging doesn't scroll the page.
 - Respect `prefers-reduced-motion`.
 
+**Wavy implementation** (_2026-10-11, step 4c_): the active track is an SVG polyline from `M3SliderMath.wavePath`. It's redrawn every animation frame, so it moves one wavelength per second (rightward, toward the handle). The wave stands still when the slider is disabled or reduced motion is on. Because the wave is drawn from code, the handle and inactive track jump straight to a tapped position instead of gliding over 150ms like the flat slider. An off card has no active track (brightness 0), so it looks the same as the flat style apart from the handle and track sizes.
+
 The new slider replaces `mushroom-slider` and removes the dependency on the mushroom package. `slider: mushroom`/`default` configs map to the new slider; `slider: none` still hides it.
 
 ## Size budget
@@ -86,7 +88,7 @@ The new slider replaces `mushroom-slider` and removes the dependency on the mush
 
 ## Decisions
 
-- **A. Slider:** both styles via `slider_style`, `flat` by default.
+- **A. Slider:** both styles via `slider: default | wavy`, flat by default.
 - **B. Toggle:** M3 switch.
 - **C. Tint:** `tint: harmonized | full`, `harmonized` by default.
 

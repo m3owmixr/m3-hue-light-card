@@ -62,7 +62,7 @@ export class ViewUtils {
         const max = 100;
         const step = 1;
 
-        // slider: default and slider: mushroom both map to the M3 slider
+        // slider: default and slider: mushroom both map to the flat M3 slider, slider: wavy to the wavy one
         // tinted = the card is lit, so the slider is drawn in the card's foreground color
         return html`
             <${unsafeStatic(M3Slider.ElementName)}
@@ -70,6 +70,7 @@ export class ViewUtils {
                 .min=${min}
                 .max=${max}
                 .step=${step}
+                .variant=${config.slider == SliderType.Wavy ? 'wavy' : 'flat'}
                 .disabled=${config.allowZero ? ctrl.isUnavailable() : ctrl.isOff()}
                 .value=${ctrl.brightnessValue}
                 @value-changing=${(ev: CustomEvent<{ value: number }>) => ViewUtils.brightnessChanging(ev.detail.value, ctrl)}

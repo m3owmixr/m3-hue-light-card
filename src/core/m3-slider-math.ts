@@ -39,6 +39,34 @@ export class M3SliderMath {
     }
 
     /**
+     * X where the active track ends: the handle's left edge minus the gap (never below 0).
+     */
+    public static activeTrackEnd(fraction: number, trackWidth: number, handleWidth: number, gap: number): number {
+        return Math.max(0, fraction * (trackWidth - handleWidth) - gap);
+    }
+
+    /**
+     * SVG path (polyline) of a sine wave from x0 to x1 around cy.
+     * x is absolute, so the wave stays put when x0/x1 change; a growing phase moves it to the right.
+     * Returns '' when x1 <= x0.
+     */
+    public static wavePath(x0: number, x1: number, cy: number, amplitude: number, wavelength: number, phase: number, step = 2): string {
+        if (x1 <= x0)
+            return '';
+
+        const k = 2 * Math.PI / wavelength;
+        const r = (n: number) => Math.round(n * 100) / 100;
+        const point = (x: number) => `${r(x)} ${r(cy + amplitude * Math.sin(k * x - phase))}`;
+
+        const parts = ['M' + point(x0)];
+        for (let x = Math.floor(x0 / step) * step + step; x < x1; x += step) {
+            parts.push(point(x));
+        }
+        parts.push(point(x1));
+        return parts.join(' L');
+    }
+
+    /**
      * Returns new value for keyboard key, or null when the key is not handled.
      */
     public static keyValue(key: string, shift: boolean, value: number, min: number, max: number): number | null {

@@ -37,7 +37,7 @@ At least one of these is required. Only `light` entities (and `switch` entities)
 | `icon` | string | [automatic](#icons) | Card icon |
 | `iconSize` | `big`, `original`, `small` or a number | `original` | See [Icons](#icons) |
 | `tint` | `harmonized` or `full` | `harmonized` | `harmonized` blends the light color into your theme's surface color, and shows brightness by how strong the tint is. `full` uses the light's colors as they are, like the original Hue-Like card. |
-| `slider` | `default` or `none` | `default` | `none` hides the brightness slider |
+| `slider` | `default`, `wavy` or `none` | `default` | `default` is the flat M3 slider. `wavy` draws the active part as a moving wave, in the M3 Expressive style; the wave stands still when the system's reduced-motion setting is on. `none` hides the brightness slider. |
 | `showSwitch` | boolean | `true` | `false` hides the on/off switch, which gives the title more room. You can then use [tap actions](#tap-and-hold-actions) to turn the lights on and off. |
 | `defaultColor` | [color](#colors) | `warm` | Color used for lights that don't report a color (white-only or switch entities) |
 | `offColor` | [extended color](#colors) | theme surface (`harmonized`), `#666` (`full`) | Card color when all lights are off. Also used in the scene screen header. |

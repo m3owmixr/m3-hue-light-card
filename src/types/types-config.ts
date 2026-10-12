@@ -14,6 +14,7 @@ export enum KnownIconSize {
 
 export enum SliderType {
     Default = 'default',
+    Wavy = 'wavy',
     None = 'none',
     Mushroom = 'mushroom'
 }
