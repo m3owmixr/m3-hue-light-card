@@ -1,1040 +1,196 @@
 # M3 Hue Light Card
 
-> **This is a fork** of [Hue-Like Light Card](https://github.com/Gh61/lovelace-hue-like-light-card) by **Gh61 (Tom Zenkner)**, restyled for **Material 3**. Everything people like about the original stays: the whole card tinted by the light's color(s), the Hue-style scene dialog with [scene_presets](https://github.com/Hypfer/hass-scene_presets) support, and one card controlling several lights.
->
-> **What's different from the original (collapsed card):**
-> - **M3 brightness slider**: flat M3 Expressive slider (16px track, slim handle, stop dot), drawn in the card's text color so it never clashes with the light color. No Mushroom dependency.
-> - **M3 switch**: custom 52×32 switch; on a lit card the track uses the text color and the handle picks up the light color.
-> - **M3 shape and type**: 28px corners, 16px padding, M3 title/body type scale, and the icon in a 40px tonal circle.
-> - **`tint: harmonized`** (default): blends the light color into your theme's surface color for a softer Material You look, with brightness shown by tint strength. Off cards use your theme surface. Works in light and dark themes. Use `tint: full` for the original saturated Hue colors.
-> - Reads [Material You](https://github.com/Nerwyn/material-you-utilities) `--md-sys-*` tokens when present and falls back to standard Home Assistant theme variables.
->
-> **Coming next:**
-> - **Wavy slider** as an option (`slider_style: wavy`), based on the M3 Expressive wavy style.
-> - **Scene dialog restyle**: the Hue scene screen still uses the original look for now.
->
-> **Details:**
-> - Card type: `custom:m3-hue-light-card`. It can be installed alongside the original card.
-> - API hash prefix: `#m3_hue_card:` (the original uses `#hue_card:`).
-> - License: LGPL-2.1, same as upstream. See [LICENSE](LICENSE) and [NOTICE](NOTICE).
-> - Slider design inspired by [M3 Cards](https://github.com/j0sp0r/m3-cards) by j0sp0r (MIT).
->
-> The rest of this page is the upstream documentation, updated where the fork behaves differently. Where an example says `hue-like-light-card`, use `m3-hue-light-card`.
-
----
-
 [![hacs_badge](https://img.shields.io/badge/HACS-Custom-41BDF5.svg)](https://github.com/hacs/integration) [![Tests](https://github.com/m3owmixr/m3-hue-light-card/actions/workflows/validation.yml/badge.svg)](https://github.com/m3owmixr/m3-hue-light-card/actions/workflows/validation.yml) ![Downloads](https://img.shields.io/github/downloads/m3owmixr/m3-hue-light-card/total.svg)
 
-
-# Hue-Like Light Card for Home Assistant
-
-This [dashboard](https://www.home-assistant.io/getting-started/concepts-terminology/#dashboards) card is providing light control. It is inspired by original Philips Hue app.
+A Home Assistant light card that takes on the color of your lights, styled for Material 3 and Material You. It's a fork of [Hue-Like Light Card](https://github.com/Gh61/lovelace-hue-like-light-card) by Gh61.
 
 <p>
-  <img alt="Screen1" src="https://github.com/Gh61/lovelace-hue-like-light-card/raw/main/doc/screen1.png" height="360" />
-  <img alt="Hue-Screen2" src="https://github.com/Gh61/lovelace-hue-like-light-card/raw/main/doc/hue-screen2.png" height="360" />
-  <img alt="Hue-Screen-Detail1" src="https://github.com/Gh61/lovelace-hue-like-light-card/raw/main/doc/hue-screen-detail-1.png" height="360" />
+  <img alt="Card in light mode" src="https://github.com/m3owmixr/m3-hue-light-card/raw/main/doc/m3-card-light.png" width="400" />
+  <img alt="Card in dark mode" src="https://github.com/m3owmixr/m3-hue-light-card/raw/main/doc/m3-card-dark.png" width="400" />
+</p>
+<p>
+  <img alt="Several lights in light mode" src="https://github.com/m3owmixr/m3-hue-light-card/raw/main/doc/m3-multi-light.png" width="400" />
+  <img alt="Several lights in dark mode" src="https://github.com/m3owmixr/m3-hue-light-card/raw/main/doc/m3-multi-dark.png" width="400" />
 </p>
 
-\* *intensity of color, shadow and other UI properties may be subject of change*
+## Features
 
-### Basic configuration
-```yaml
-type: custom:hue-like-light-card
-entity: light.livingroom_color
-```
-Where **livingroom_color** is the [entity](https://www.home-assistant.io/getting-started/concepts-terminology/#devices--entities) id of some existing **light**.
-
-For more options see [Configuration](#configuration) or let yourself inspire in [Examples of configuration](#examples-of-configuration)
-
-### Hue icons
-For the best experience use with [hass-hue-icons](https://github.com/arallsopp/hass-hue-icons).
-You can then use icons you are used to (from Philips Hue app).
-
-Also this card will detect these icons installed and will use them prior to HA icons on some places (eg. brightness icon).
+- **Tinted by your lights.** The card takes on the color of its lights, blended with your theme. Several lights of different colors make a gradient.
+- **Material 3 controls.** A flat M3 brightness slider and switch, drawn in the card's text color so they never clash with the light color.
+- **Hue-style scene screen.** Tap the card to pick scenes and adjust each light, including [Scene Presets](https://github.com/Hypfer/hass-scene_presets) support.
+- **One card, many lights.** Control a single light, a list, or a whole area, floor or label.
+- **Works with your theme.** Uses [Material You](https://github.com/Nerwyn/material-you-utilities) colors when available, and standard Home Assistant theme colors otherwise. Light and dark mode are both supported.
 
 ## Installation
 
-### HACS (custom repository)
+### HACS (recommended)
 
-- Open HACS
-- Click the three-dot menu (top right) and choose **Custom repositories**
-- Repository: `https://github.com/m3owmixr/m3-hue-light-card`, Type: **Dashboard**
-- Search for "M3 Hue Light Card" and download it
-- Refresh your browser
+1. Open HACS.
+2. Open the three-dot menu (top right) and choose **Custom repositories**.
+3. Add `https://github.com/m3owmixr/m3-hue-light-card` with the type **Dashboard**.
+4. Search for **M3 Hue Light Card** and download it.
+5. Refresh your browser.
 
 ### Manual
 
-- Download `m3-hue-light-card.js` from the [latest release](https://github.com/m3owmixr/m3-hue-light-card/releases/latest)
-- Save it somewhere in `<ha config>/www/`, e.g. `/config/www/custom_lovelace/m3-hue-light-card.js`
-- Add the file to [Dashboard resources](https://my.home-assistant.io/redirect/lovelace_resources/)
-  ```yaml
-  url: /local/custom_lovelace/m3-hue-light-card.js
-  type: module
-  ```
-- Restart HA if you had to create the `www` directory
-- Refresh your browser
+1. Download `m3-hue-light-card.js` from the [latest release](https://github.com/m3owmixr/m3-hue-light-card/releases/latest).
+2. Copy it to `/config/www/`, for example `/config/www/m3-hue-light-card.js`.
+3. Add it under [Dashboard resources](https://my.home-assistant.io/redirect/lovelace_resources/) with the URL `/local/m3-hue-light-card.js` and the type **JavaScript module**.
+4. Refresh your browser.
 
-## Configuration
+## Recommended setup
 
-<b>This table may contain not yet released options.❗❗❗</b><br/>
-Some of these options may not be in the latest version. Please always check the **Since** column.
+The card looks best with these two, both by Nerwyn:
 
-<table>
-  <tr>
-    <th>Key</th>
-    <th>Type</th>
-    <th>Required</th>
-    <th>Since</th>
-    <th>Default</th>
-    <th>Description</th>
-  </tr>
-  <tr>
-    <td><code>entity</code></td>
-    <td>string</td>
-    <td>yes*</td>
-    <td>1.0.0</td>
-    <td>-</td>
-    <td><b>Light</b> or <b>switch</b> <i>(since 1.9.0)</i> entity ID (eg. <code>light.my_light</code>)</td>
-  </tr>
-  <tr>
-    <td><code>entities</code></td>
-    <td>list of strings OR list of <a href="#entity-configuration">Entities</a></td>
-    <td>yes*</td>
-    <td>1.0.0</td>
-    <td>-</td>
-    <td>Multiple <b>Light</b> and/or <b>switch</b> <i>(since 1.9.0)</i> entity IDs</td>
-  </tr>
-  <tr>
-    <td><code>floor</code></td>
-    <td>string</td>
-    <td>yes*</td>
-    <td>1.8.0</td>
-    <td>-</td>
-    <td>
-      Name or ID of <b>Floor</b> with lights<br/>
-      (eg. <code>First floor</code> or <code>first_floor</code>)
-    </td>
-  </tr>
-  <tr>
-    <td><code>area</code></td>
-    <td>string</td>
-    <td>yes*</td>
-    <td>1.6.0</td>
-    <td>-</td>
-    <td>
-      Name or ID of <b>Area</b> with lights<br/>
-      (eg. <code>Living room</code> or <code>living_room</code>)
-    </td>
-  </tr>
-  <tr>
-    <td><code>label</code></td>
-    <td>string</td>
-    <td>yes*</td>
-    <td>1.7.0</td>
-    <td>-</td>
-    <td>
-      Name or ID of <b>Label</b> with lights<br/>
-      (eg. <code>Kitchen - desk</code> or <code>kitchen_desk</code>)
-    </td>
-  </tr>
-  <tr>
-    <td><code>groupEntity</code></td>
-    <td>string</td>
-    <td>no</td>
-    <td>1.6.0</td>
-    <td>-</td>
-    <td><b>Light</b> entity ID that represents the group of light entities (eg. <code>light.my_light_group</code>). Some platforms (<i>like hue</i>) will provide an entity representing the room, in addition to the individual light entities (<i>might be disabled by default</i>). This can be defined to toggle the lights all at once, rather than successively.</td>
-  </tr>
-  <tr>
-    <td><code>title</code></td>
-    <td><a href="#text-template">Text Template</a></td>
-    <td>no</td>
-    <td>1.0.0</td>
-    <td><i>Lights name</i></td>
-    <td>Card title</td>
-  </tr>
-  <tr>
-    <td><code>description</code></td>
-    <td><a href="#text-template">Text Template</a> OR <code>false</code></td>
-    <td>no</td>
-    <td>1.5.0</td>
-    <td><i><a href="#automatic-description">automatic description</a></i></td>
-    <td>Description under the cards title. Placeholder <code>%s</code> can be used for showing number of lit lights. (eg. <code>'Is on: %s'</code>)<br/>If set to <code>false</code>, description will not show.</td>
-  </tr>
-  <tr>
-    <td><code>icon</code></td>
-    <td>string</td>
-    <td>no</td>
-    <td>1.0.0</td>
-    <td><i><a href="#automatic-icon">automatic icon</a></i></td>
-    <td>Card icon</td>
-  </tr>
-  <tr>
-    <td><code>iconSize</code></td>
-    <td><a href="#icon-size">Icon size</a></td>
-    <td>no</td>
-    <td>1.4.2</td>
-    <td><code>original</code></td>
-    <td>Card icon size</td>
-  </tr>
-  <tr>
-    <td><code>showSwitch</code></td>
-    <td>boolean</td>
-    <td>no</td>
-    <td>1.2.1</td>
-    <td><code>true</code></td>
-    <td>When set to <code>false</code>, toggle switch will not be visible on card. This will give more space for <code>title</code>.<br/>
-    (You can then use <code>offClickAction</code> and <code>onClickAction</code> to turn the lights on/off.)</td>
-  </tr>
-  <tr>
-    <td><code>switchOnScene</code></td>
-    <td>string</td>
-    <td>no</td>
-    <td>1.6.0</td>
-    <td>-</td>
-    <td><b>Scene</b> entity ID (eg. <code>scene.office_bright</code>).<br/>If set, this scene will be activated when switch changes from OFF to ON (instead of just runing all lights on).</td>
-  </tr>
-  <tr>
-    <td><code>slider</code></td>
-    <td><a href="#slider-type">Slider type</a></td>
-    <td>no</td>
-    <td>1.5.0</td>
-    <td><code>default</code></td>
-    <td>Show the M3 brightness slider or hide it.</td>
-  </tr>
-  <tr>
-    <td><code>tint</code></td>
-    <td><code>harmonized</code> | <code>full</code></td>
-    <td>no</td>
-    <td>M3 2.0.0</td>
-    <td><code>harmonized</code></td>
-    <td><code>harmonized</code> blends the light color into the theme surface (<code>--md-sys-color-surface-container-high</code>), shows brightness by tint strength, and uses the theme surface when off. <code>full</code> keeps the original saturated colors and brightness shadow.</td>
-  </tr>
-  <tr>
-    <td><code>scenes</code></td>
-    <td>list of <a href="#scenes-configuration">Scenes</a><br/>OR empty list <code>[]</code></td>
-    <td>no</td>
-    <td>1.1.0</td>
-    <td><i><a href="#scenes-detection">automatic detection</a></i></td>
-    <td>Scenes shown in <a href="#hue-screen">Hue screen</a></td>
-  </tr>
-  <tr>
-    <td><code>sceneOrder</code></td>
-    <td><a href="#scene-order">Scene Order</a></td>
-    <td>no</td>
-    <td>1.5.0</td>
-    <td><code>default</code></td>
-    <td>Order of <a href="#scenes-detection">automatically detected</a> scenes shown in <a href="#hue-screen">Hue screen</a></td>
-  </tr>
-  <tr>
-    <td><code>sceneProvider</code></td>
-    <td>single OR list of <a href="#scene-provider">Scene Providers</a></td>
-    <td>no</td>
-    <td>1.11.0</td>
-    <td><code>'ha-scenes'</code></td>
-    <td>The provider(s) of scenes to be displayed</td>
-  </tr>
-  <tr>
-    <td><code>allowZero</code></td>
-    <td>boolean</td>
-    <td>no</td>
-    <td>1.0.0</td>
-    <td><code>false</code></td>
-    <td>If turned on, the slider can be moved to and from value 0.<br/>(turning off/on the the lights)</td>
-  </tr>
-  <tr>
-    <td><code>defaultColor</code></td>
-    <td><a href="#color">Color</a></td>
-    <td>no</td>
-    <td>1.0.0</td>
-    <td><code>'warm'</code></td>
-    <td>
-      If selected light (or lights) doesn't have RGB mode,<br/>this value is used as color when the light is on.
-  </tr>
-  <tr>
-    <td><code>offColor</code></td>
-    <td><a href="#colorextended">ColorExtended</a></td>
-    <td>no</td>
-    <td>1.0.0</td>
-    <td><code>'#666'</code><br/>(<code>'#363636'</code> for <a href="#hue-screen">Hue Screen</a>)<br/>With <code>tint: harmonized</code>: theme surface</td>
-    <td>
-      The color of the pane, when all lights are off.
-      When set, also used in <a href="#hue-screen">Hue Screen</a> header (recommended setting also <code>hueScreenBgColor</code> accordingly).
-    </td>
-  </tr>
-  <tr>
-    <td><code>hueScreenBgColor</code></td>
-    <td><a href="#colorextended">ColorExtended</a></td>
-    <td>no</td>
-    <td>1.1.0</td>
-    <td><code>'#171717'</code></td>
-    <td>
-      Background color of <a href="#hue-screen">Hue Screen</a>
-    </td>
-  </tr>
-  <tr>
-    <td><code>theme</code></td>
-    <td><i>Installed theme name</i></td>
-    <td>no</td>
-    <td>1.2.1</td>
-    <td><i>Global HA theme</i></td>
-    <td>Will use specific theme for this single card. Other than the current selected globally in Home Assistant.</td>
-  </tr>
-  <tr>
-    <td><s><code>disableOffShadow</code></s></td>
-    <td>boolean</td>
-    <td>no</td>
-    <td><i>removed in 1.6.0</i></td>
-    <td><code>false</code></td>
-    <td><s>If turned on, the card will not have inner shadow, when all lights are off.</s></td>
-  </tr>
-  <tr>
-    <td><code>offShadow</code></td>
-    <td>boolean</td>
-    <td>no</td>
-    <td>1.3.0</td>
-    <td><code>true</code></td>
-    <td>If turned off, the card will not have inner shadow, when all lights are off.</td>
-  </tr>
-  <tr>
-    <td><code>hueBorders</code></td>
-    <td>boolean</td>
-    <td>no</td>
-    <td>1.0.0</td>
-    <td><code>true</code></td>
-    <td>If turned off, the card will take border settings from current Home Assistant theme.</td>
-  </tr>
-  <tr>
-    <td><code>apiId</code></td>
-    <td>string</td>
-    <td>no</td>
-    <td>1.7.0</td>
-    <td>-</td>
-    <td>Identifier of the card for the <a href="#api-interface">API interface</a>.</td>
-  </tr>
-  <tr>
-    <td><code>isVisible</code></td>
-    <td>boolean</td>
-    <td>no</td>
-    <td>1.7.0</td>
-    <td><code>true</code></td>
-    <td>If turned off, the card will be hidden. (Use this if you only want the API functions.)</td>
-  </tr>
-  <tr>
-    <td><s><code>resources</code></s></td>
-    <td>Resources object</td>
-    <td>no</td>
-    <td><i>removed in 1.5.0<i></td>
-    <td>-</td>
-    <td><s>Can change (localize) texts on this card</s><br/><i>Replaced with integrated localization.</i></td>
-  </tr>
-  <tr>
-    <td><code>style</code></td>
-    <td></td>
-    <td>no</td>
-    <td>1.4.0</td>
-    <td>-</td>
-    <td>Support for the <a href="https://github.com/thomasloven/lovelace-card-mod">card-mod</a>.</td>
-  </tr>
-  <tr>
-    <td><code>card_mod</code></td>
-    <td></td>
-    <td>no</td>
-    <td>1.4.0</td>
-    <td>-</td>
-    <td>Support for the <a href="https://github.com/thomasloven/lovelace-card-mod">card-mod</a>.</td>
-  </tr>
-  <tr>
-    <td colspan="6">
-      <i>* At least one of these options must be filled in. <b>Only entities of <code>light</code> domain and/or floors, areas and labels with <code>light</code> domain entities are supported.</b></i>
-    </td>
-  </tr>
-</table>
+- **[Material You Theme](https://github.com/Nerwyn/material-you-theme):** a Material 3 theme for Home Assistant
+- **[Material You Utilities](https://github.com/Nerwyn/material-you-utilities):** creates Material 3 colors from a color you pick
 
-## Entity Configuration
-<table>
-  <tr>
-    <th>Key</th>
-    <th>Type</th>
-    <th>Required</th>
-    <th>Since</th>
-    <th>Description</th>
-  </tr>
-  <tr>
-    <td><code>entity</code></td>
-    <td>string</td>
-    <td>yes</td>
-    <td>1.4.1</td>
-    <td><b>Light</b> or <b>switch</b> <i>(since 1.9.0)</i> entity ID (eg. <code>light.my_light</code>)</td>
-  </tr>
-  <tr>
-    <td><code>title</code></td>
-    <td>string</td>
-    <td>no</td>
-    <td>1.8.0</td>
-    <td>Light title shown on <a href="#hue-screen">Hue Screen</a></td>
-  </tr>
-  <tr>
-    <td><code>icon</code></td>
-    <td>string</td>
-    <td>no</td>
-    <td>1.8.0</td>
-    <td>Light icon shown on <a href="#hue-screen">Hue Screen</a></td>
-  </tr>
-</table>
+With them, `tint: harmonized` blends your lights into the same Material colors as the rest of your dashboard. They're optional: without them, the card uses your current theme's colors.
 
-### Click & Hold configuration
-<table>
-  <tr>
-    <th>Key</th>
-    <th>Type</th>
-    <th>Required</th>
-    <th>Since</th>
-    <th>Default</th>
-    <th>Description</th>
-  </tr>
-  <tr>
-    <td><code>offClickAction</code></td>
-    <td><a href="#click-hold-action">Action</a></td>
-    <td>no</td>
-    <td>1.1.0</td>
-    <td><code>hue-screen</code></td>
-    <td>Action when tile is clicked and all <b>lights are off</b></td>
-  </tr>
-  <tr>
-    <td><code>offClickData</code></td>
-    <td><a href="#action-data">Action Data</a></td>
-    <td>no</td>
-    <td>1.1.0</td>
-    <td>-</td>
-    <td><a href="#action-data">Data</a> for <code>offClickAction</code></td>
-  </tr>
-  <tr>
-    <td><code>onClickAction</code></td>
-    <td><a href="#click-hold-action">Action</a></td>
-    <td>no</td>
-    <td>1.1.0</td>
-    <td><code>hue-screen</code></td>
-    <td>Action when tile is clicked and any of <b>lights is on</b></td>
-  </tr>
-  <tr>
-    <td><code>onClickData</code></td>
-    <td><a href="#action-data">Action Data</a></td>
-    <td>no</td>
-    <td>1.1.0</td>
-    <td>-</td>
-    <td><a href="#action-data">Data</a> for <code>onClickAction</code></td>
-  </tr>
-  <tr>
-    <td><code>offHoldAction</code></td>
-    <td><a href="#click-hold-action">Action</a></td>
-    <td>no</td>
-    <td>1.6.0</td>
-    <td><code>more-info</code></td>
-    <td>Action when tile is pressed and all <b>lights are off</b></td>
-  </tr>
-  <tr>
-    <td><code>offHoldData</code></td>
-    <td><a href="#action-data">Action Data</a></td>
-    <td>no</td>
-    <td>1.6.0</td>
-    <td>-</td>
-    <td><a href="#action-data">Data</a> for <code>offHoldAction</code></td>
-  </tr>
-  <tr>
-    <td><code>onHoldAction</code></td>
-    <td><a href="#click-hold-action">Action</a></td>
-    <td>no</td>
-    <td>1.6.0</td>
-    <td><code>more-info</code></td>
-    <td>Action when tile is pressed and any of <b>lights is on</b></td>
-  </tr>
-  <tr>
-    <td><code>onHoldData</code></td>
-    <td><a href="#action-data">Action Data</a></td>
-    <td>no</td>
-    <td>1.6.0</td>
-    <td>-</td>
-    <td><a href="#action-data">Data</a> for <code>onHoldAction</code></td>
-  </tr>
-</table>
+## Quick start
 
-### Automatic Icon
-- If `label` option is set and given label has icon, the icon is taken from label.
-- If the card has **one** light entity attached, the icon is taken from entity.
-    - If the entity has no icon, `mdi:lightbulb` (![lightbulb](https://user-images.githubusercontent.com/10837736/171443813-5e0dc16c-de15-43a1-9e96-0917c038e0a9.svg)) is used.
-- If the card has **two** lights `mdi:lightbulb-multiple` (![lightbulb-multiple](https://user-images.githubusercontent.com/10837736/171444016-4b571fcf-0e30-4eca-9baf-61a710c17c05.svg)) is used.
-- If the card has **three or more** lights attached, `mdi:lightbulb-group` (![lightbulb-group](https://user-images.githubusercontent.com/10837736/171444069-639d41d5-1dc7-4bd7-8104-b77f52df86fb.svg)) is used.
+Add a card in your dashboard, choose **Manual**, and paste one of these.
 
-
-When [hass-hue-icons](https://github.com/arallsopp/hass-hue-icons) is installed *(Since version 1.4.1)*:
-- If the card has **one** light entity attached, the icon is taken from entity.
-    - If the entity has no icon, `hue:bulb-classic` (<img alt='bulb-classic' src='https://raw.githubusercontent.com/arallsopp/hass-hue-icons/main/docs/svgs/bulb-classic.svg' height="24">) is used.
-- If the card has **two** lights `hue:bulb-group-classic` (<img alt='bulb-group-classic' src='https://raw.githubusercontent.com/arallsopp/hass-hue-icons/main/docs/custom_svgs/bulb-group-classic.svg' height="24">) is used.
-- If the card has **three** lights attached, `hue:bulb-group-classic-3` (<img alt='bulb-group-classic-3' src='https://raw.githubusercontent.com/arallsopp/hass-hue-icons/main/docs/custom_svgs/bulb-group-classic-3.svg' height="24">) is used.
-- If the card has **four or more** lights attached, `hue:bulb-group-classic-4` (<img alt='bulb-group-classic-4' src='https://raw.githubusercontent.com/arallsopp/hass-hue-icons/main/docs/custom_svgs/bulb-group-classic-4.svg' height="24">) is used.
-
-### Automatic description
-*Since version 1.5.0*
-
-Based on number of lit lights in group, one of the 4 localized text is used (priority from top):
-- **0** lights on
-- **ALL** lights on
-- **1** light on
-- **X/Y** lights on
-
-### Icon size
-*Since version 1.4.2*
-
-You can set size of the icon on hue card. Possibilities are:
-- `big` - default icon size for versions <= 1.4.1 [value: **2.0**]
-- `original` - default icon size [value: **1.41666667**]
-- `small` - [value: **1.0**]
-- any size you want (as number), examples:
-    - `0.5` = 12px
-    - `1.0` = 24px
-    - `1.5` = 36px
-    - `2.0` = 48px
-    - ... you got it
-
-## Slider Type
-*Since version 1.5.0 (M3 slider since M3 2.0.0)*
-
-You can set slider to one of the following options:
-- `default` - the M3 brightness slider
-- `none` - hides the slider entirely (same as if the light did not have brightness control)
-- `mushroom` - kept for older configs; shows the M3 slider. [Mushroom](https://github.com/piitaya/lovelace-mushroom) is no longer needed.
-
-The slider follows the M3 Expressive spec: 16px track, 4px handle that narrows while dragging, and a stop dot at the end. Brightness updates are sent while you drag (about 5 per second). It also works with the keyboard: arrow keys change brightness by 5%, with Shift by 1%, and Home/End jump to the ends.
-
-On a lit card the slider is drawn in the card's text color. You can override the colors with [Card mod](https://github.com/thomasloven/lovelace-card-mod):
+**One light**
 
 ```yaml
 type: custom:m3-hue-light-card
-entity: light.office
-card_mod:
-  style: |
-    .brightness-slider {
-      --m3-slider-active-color: white;
-      --m3-slider-inactive-color: rgba(255, 255, 255, 0.24);
-      --m3-slider-handle-color: white;
-      --m3-slider-stop-color: rgba(255, 255, 255, 0.6);
-    }
+entity: light.floor_lamp
 ```
 
-## Text template
-*Since version 1.2.0*<br/>
-*Localized since 1.4.0*
+**Several lights**
 
-The text supports showing entity states and attributes using double curly `{{` brackets `}}`.
-When you insert entity name inside these brackets, entity status will be resolved and shown on given place. You can also show attribute on this entity.
-
-#### Simple state
 ```yaml
-type: custom:hue-like-light-card
-title: TV - {{ light.tv_backlight }}
-entity: light.tv_backlight
-```
-
-![Template usage](/doc/template-screen1.png)
-
-#### Attribute ussage
-```yaml
-type: custom:hue-like-light-card
-title: Kitchen - desk ({{ light.kitchen_desk1.brightness }}, {{light.kitchen_desk2.brightness}})
-icon: mdi:wall-sconce-flat
-offColor: '#363636'
+type: custom:m3-hue-light-card
+title: TV lights
 entities:
-  - light.kitchen_desk1
-  - light.kitchen_desk2
+  - light.tv_left
+  - light.tv_right
 ```
-![Template attribute usage](/doc/template-screen2.png)
 
-*When attribute is not available (or is empty) on entity, state of the entity will be shown instead.*
-
-#### Usage in description:
-*Since version 1.5.0*
+**A whole area** (also works with `floor` or `label`)
 
 ```yaml
-type: custom:hue-like-light-card
-title: Kitchen - desk 
-description: 'Lights on: %s ({{ light.kitchen_desk1.brightness }}, {{light.kitchen_desk2.brightness}})'
-icon: mdi:wall-sconce-flat
-offColor: '#363636'
-entities:
-  - light.kitchen_desk1
-  - light.kitchen_desk2
-```
-![Template usage in description](/doc/template-screen3.png)
-
-## Color
-The color can be defined in following ways:
-<ul>
-  <li>HEX: <code>'#fff'</code>, <code>'#ffffff'</code></li>
-  <li>HEX (with alpha): <code>'#fffa'</code>, <code>'#ffffffaa'</code> <i>(since version 1.4.0)</i></li>
-  <li>RGB: <code>'rgb(255,255,255)'</code></li>
-  <li>RGBA: <code>'rgba(255,255,255,0.9)'</code> <i>(since version 1.4.0)</i></li>
-  <li>WEB name: <code>'red'</code>,<code>'salmon'</code>,<code>'DarkSeaGreen'</code>, etc.</li>
-  <li>predefined: <code>'warm'</code> or <code>'cold'</code> (in places where it does make sense)</td></li>
-</ul>
-
-## ColorExtended
-*Since version 1.2.0*
-
-Same as [Color](#color) and can also be defined as
-<ul>
-  <li><code>theme-color</code></li>
-</ul>
-This will pick the color from currently used Home Assistant theme.
-
-## Click (hold) action
-When the card is clicked or pressed, something can happen. This can be configured through configuration.
-```yaml
-type: custom:hue-like-light-card
-...
-offClickAction: turn-on
-onClickAction: turn-off
-offHoldAction: hue-screen
-onHoldAction: hue-screen
-```
-*Simple example to toggle lights on click.*
-
-### Possible actions
-<table>
-  <tr>
-    <th width="120">Key</th>
-    <th><a href="#action-data">Possible data*</a></th>
-    <th>Data required</th>
-    <th>Since</th>
-    <th>What is happening</th>
-  </tr>
-  <tr>
-    <td><code>default</code></td>
-    <td>yes</td>
-    <td>no</td>
-    <td>1.1.0</td>
-    <td>
-      <b>Click</b>: <code>hue-screen</code><br/>
-      <b>Hold</b>: <code>more-info</code>
-    </td>
-  </tr>
-  <tr>
-    <td><code>none</code></td>
-    <td>no</td>
-    <td>no</td>
-    <td>1.1.0</td>
-    <td>nothing</td>
-  </tr>
-  <tr>
-    <td><code>turn-on</code></td>
-    <td>no</td>
-    <td>no</td>
-    <td>1.1.0</td>
-    <td>turn on all lights</td>
-  </tr>
-  <tr>
-    <td><code>turn-off</code></td>
-    <td>no</td>
-    <td>no</td>
-    <td>1.1.0</td>
-    <td>turn off all lights</td>
-  </tr>
-  <tr>
-    <td><code>more-info</code></td>
-    <td>yes (<code>entity</code>)</td>
-    <td>no</td>
-    <td>1.1.0<br/>(group entity 1.8.0)</td>
-    <td>
-      Shows system more-info dialog of one light.<br/>
-      Uses group entity, if set.<br/>
-      Uses first lit light if any.<br/>
-      Uses first light as backup.<br/>
-      When action data are used, any entity can be used.
-    </td>
-  </tr>
-  <tr>
-    <td><code>scene</code></td>
-    <td>yes (<code>scene</code>)</td>
-    <td>yes</td>
-    <td>1.1.0</td>
-    <td>activate selected scene</td>
-  </tr>
-  <tr>
-    <td><code>hue-screen</code></td>
-    <td>no<br/>(is using general <a href="#scenes-configuration"><code>scenes</code></a> config)</td>
-    <td>no</td>
-    <td>1.1.0</td>
-    <td>show <a href="#hue-screen">Hue Screen</a></td>
-  </tr>
-</table>
-
-### Action data
-Some actions can be configured using action data. Action data parameter can have name (as defined in table above) but it is not mandatory. Both styles are possible.
-
-*Action data without name:*
-```yaml
-type: custom:hue-like-light-card
-...
-onClickAction: more-info
-onClickData: media_player.television
-```
-
-*Action data with name:*
-```yaml
-type: custom:hue-like-light-card
-...
-offClickAction: scene
-offClickData:
-  scene: scene.tv_citron
-```
-
-## API interface
-*Since version 1.7.0*
-
-You can enable the API functions of certain card by passing the `apiId` identifier in the settings. The identifier can be any string you want (although there could be issues with special characters).
-```yaml
-type: custom:hue-like-light-card
-...
-apiId: room1
-```
-*If you only want to use the API (dialog) from another cards, you can hide this card using `isVisible: false` setting.*
-
-### Javascript usage
-When any card on the dashboard has `apiId` filled in, global object named `hue_card` will be available on `window` object.<br/>
-![Api-object](/doc/api-object.png)
-<br/>
-There will be API functions for every card, that has `apiId` defined. Functions are named `{apiId}_functionName`.
-#### Available functions
-<table>
-  <tr>
-    <th>Name</th>
-    <th>Since</th>
-    <th>Description</th>
-  </tr>
-  <tr>
-    <td><code>{apiId}_openHueScreen</code></td>
-    <td>1.7.0</td>
-    <td>Will open <a href="#hue-screen">Hue Screen</a> of the identified card</td>
-  </tr>
-</table>
-
-### URL usage
-The API functions can be called by setting the hash part of the current URL. The URL must be in this format:
-
-```
-{anything}#hue_card:{apiId}_{functionName}
-```
-For example:
-```
-https://10.0.0.1:8123/lovelace/lights#hue_card:room1_openHueScreen
-```
-When the URL is correctly set, the API will make the call (in this example to `hue_card.room1_openHueScreen()` which will open the hue screen).
-The URL will be then set back to non-hash version (eg. `https://10.0.0.1:8123/lovelace/lights`).
-
-*This is achieved by monitoring the hash part of the current URL and checking for `#hue_card:` prefix.*
-
-This way you can create link, leading to certain lovelace dashboard page and instantly opening Hue Screen for one of your hue-cards.
-You can also create navigate action from other card. The click will then result in opening the Hue Screen:
-
-```yaml
-type: custom:mushroom-light-card
-entity: light.living_room
-tap_action:
-  action: navigate
-  navigation_path: '#hue_card:room1_openHueScreen'
-```
-
-## Scenes configuration
-To enable switching between scenes, you can configure scenes, that can be activated in [Hue Screen](#hue-screen).<br/>
-When no scenes are defined, scenes will be detected [automatically](#scenes-detection).<br/>
-If you want to hide scenes completely, you can set the option to empty list <code>scenes: []</code>
-### Scene parameters
-<table>
-  <tr>
-    <th>Key</th>
-    <th>Type</th>
-    <th>Required</th>
-    <th>Since</th>
-    <th>Default</th>
-    <th>Description</th>
-  </tr>
-  <tr>
-    <td><code>entity</code></td>
-    <td>string</td>
-    <td>yes</td>
-    <td>1.1.0</td>
-    <td>-</td>
-    <td><b>Scene</b> entity ID (eg. <code>scene.tv_orange</code>)</td>
-  </tr>
-  <tr>
-    <td><code>title</code></td>
-    <td>string</td>
-    <td>no</td>
-    <td>1.1.0</td>
-    <td><i>Scene name*</i></td>
-    <td>Text on scene-button</td>
-  </tr>
-  <tr>
-    <td><code>icon</code></td>
-    <td>string</td>
-    <td>no</td>
-    <td>1.1.0</td>
-    <td><i>Icon of scene</i> or <code>'mdi:palette'</code></td>
-    <td>Icon on scene-button</td>
-  </tr>
-  <tr>
-    <td><code>color</code></td>
-    <td><a href="#color">Color</a></td>
-    <td>no</td>
-    <td>1.1.0</td>
-    <td><code>'darkgoldenrod'</code></td>
-    <td>Accent color current scene (shown on scene-button)</td>
-  </tr>
-  <tr>
-    <td><code>activation</code></td>
-    <td><a href="https://www.home-assistant.io/docs/scripts/service-calls/">Service name</a></td>
-    <td>no</td>
-    <td>1.2.0</td>
-    <td><code>'scene.turn_on'</code></td>
-    <td>Service called when scene is activated</td>
-  </tr>
-  <tr>
-    <td><code>activationData</code></td>
-    <td>object</td>
-    <td>no</td>
-    <td>1.2.0</td>
-    <td>-</td>
-    <td>Data for <code>activation</code> service.**</td>
-  </tr>
-  <tr>
-    <td colspan="6">
-      <i>* If the scene name begins with the same text as the card title is, this text is removed.</i>
-    </td>
-  </tr>
-  <tr>
-    <td colspan="6">
-      <i>** Data always have <code>entity_id</code> parameter filled with <code>entity</code> name. You can change this value, when another value is supplied with this name.</i>
-    </td>
-  </tr>
-</table>
-
-#### Example of scenes configuration
-```yaml
-type: custom:hue-like-light-card
-...
-scenes:
-  - scene.colors_bluered            # if only entity is used, it can be written directly
-  - entity: scene.colors_cyan
-    title: My really favorite scene
-    color: cyan
-  - entity: scene.colors_blue_xmass
-    icon: mdi:tree-outline
-  - entity: scene.colors_white
-    color: white
-    icon: ''                        # when you don't want the icon, you can set it to empty string
-```
-For the best experience, please fill in both `icon` and `color` for all scenes.
-
-*Since version 1.6.0*
-
-Hue screen will load `entity_picture` from entity itself.<br/>
-You can set custom image as `entity_picture` using the `customize_glob` option in [HA configuration](https://www.home-assistant.io/docs/configuration/customizing-devices/#manual-customization).<br/>
-As an inspiration look at [this project](https://github.com/mattmon/hue-scene-icons) containing OG hue icons and default config for english scene names.
-
-### Scenes detection
-Automatic scene detection will take place when no scenes are configured.
-
-Scenes are detected from areas where lights are placed.<br/>
-All scenes from all areas, where configured lights are placed, are taken (duplicates are removed).
-
-**Example:**
-
-`entities:`<br/>
-`- light.kitchen_main` => `'Kitchen'` (area) => [`'scene.kitchen_lit'`, `'scene.sink_lit'`]<br/>
-`- light.kitchen_corner` => `'Kitchen'` (area) => [`'scene.kitchen_lit'`, `'scene.sink_lit'`]<br/>
-`- light.room1` => `'Living room'` (area) => [`'scene.daylight'`, `'scene.nighttime'`, `'scene.reduced'`]<br/>
-Scenes Detected: [`'scene.kitchen_lit'`, `'scene.sink_lit'`, `'scene.daylight'`, `'scene.nighttime'`, `'scene.reduced'`]
-
-**Icon** of detected scenes is taken from your Home Assistant settings. You can change the icon in entity settings.
-
-**Color** of scene cannot be detected automatically, for the best experience fill scenes and respective colors manually.
-
-#### Scene Order
-*Since version 1.5.0*
-
-Automatically detected scenes can be ordered with `sceneOrder` option. Possible values are:
-- `default` 
-  - order of scenes depends on order of (first area) light entities.
-  - scenes inside areas have default order from Home assistant (alphabetically by scene id).
-- `name-asc`
-  - all scenes (across all areas) are ordered alphabetically by name **a -> z**
-- `name-desc`
-  - all scenes (across all areas) are ordered alphabetically by name **z -> a**
-
-This order is **not applied**, when scenes are configured **manually**.
-
-Note, that scenes are listed in two rows populated like this:
-```
-| 1 | 3 | 5 |
----------------------
-| 2 | 4 | ...
-```
-
-#### Scene provider
-*Since version 1.11.0*
-
-You can choose whether you want to use the default HA scene provider and/or [Hypfer's Scene Presets](https://github.com/Hypfer/hass-scene_presets).
-
-This can be done by chaning the config value `sceneProvider` to `scene-presets`. Supported values are `'ha-scenes'` and `'scene-presets'`.
-You can set this value to one of them or a list of them. For example:
-```yaml
-type: custom:hue-like-light-card
-...
-sceneProvider: scene-presets
-```
-
-or
-
-```yaml
-type: custom:hue-like-light-card
-...
-sceneProvider:
-  - ha-scenes
-  - scene-presets
-```
-
-*The order of scenes in [Hue Screen](#hue-screen) depends on the order of providers passed.*
-
-### Custom activation example (Hue dynamic scene)
-```yaml
-type: custom:hue-like-light-card
-...
-scenes:
-  ...
-  - entity: scene.colors_tokio
-    color: rgb(168, 25, 255)
-    icon: mdi:home-city
-    title: Tokio (dynamic)
-    activation: hue.activate_scene
-    activationData:
-      dynamic: true
-      brightness: 180
-      speed: 40
-```
-
-## Hue Screen
-Hue screen will allow you to activate [scenes](#scenes-configuration), set light colors, temp and brightness (same functionality as official Hue App).
-*Function of effects activation will come in the future.*
-
-![Hue-Screen](/doc/hue-screen1.png)
-<img alt="Hue-Screen2" src="https://github.com/Gh61/lovelace-hue-like-light-card/raw/main/doc/hue-screen2.png" height="540" />
-![Hue-Screen-Detail](/doc/hue-screen-detail-2.png)
-<img alt="Hue-Screen-Detail1" src="https://github.com/Gh61/lovelace-hue-like-light-card/raw/main/doc/hue-screen-detail-1.png" height="540" />
-
-## Examples of configuration
-#### Area
-![Screen10](/doc/screen10.png)
-```yaml
-type: custom:hue-like-light-card
+type: custom:m3-hue-light-card
 area: Living room
 icon: mdi:sofa
-offColor: '#363636'
 ```
 
-#### Multiple lights
-![Screen2](/doc/screen2.png)
+## Common options
+
+| Option | Default | What it does |
+|---|---|---|
+| `entity` / `entities` | - | The light(s) to control. Switches work too. |
+| `area` / `floor` / `label` | - | Control every light in an area, floor or label |
+| `title` | the lights' name | Card title. Can include [entity states](https://github.com/m3owmixr/m3-hue-light-card/blob/main/doc/configuration.md#text-templates). |
+| `description` | lights-on summary | Line under the title. `false` hides it. |
+| `icon` | chosen automatically | Card icon |
+| `tint` | `harmonized` | `harmonized` or `full`. See [Tint](#tint). |
+| `slider` | `default` | `none` hides the brightness slider |
+| `showSwitch` | `true` | `false` hides the on/off switch |
+| `allowZero` | `false` | `true` lets the slider turn the lights off at 0 |
+| `switchOnScene` | - | Scene to activate when you switch the card on |
+| `scenes` | detected automatically | Scenes shown in the scene screen. `[]` hides them. |
+
+Every option, including tap and hold actions, colors and scene settings, is in the **[full configuration reference](https://github.com/m3owmixr/m3-hue-light-card/blob/main/doc/configuration.md)**.
+
+## Tint
+
+`tint` controls how strongly the light color shows on the card.
+
+| `harmonized` (default) | `full` |
+|---|---|
+| <img alt="tint: harmonized" src="https://github.com/m3owmixr/m3-hue-light-card/raw/main/doc/m3-tint-harmonized.png" width="380" /> | <img alt="tint: full" src="https://github.com/m3owmixr/m3-hue-light-card/raw/main/doc/m3-tint-full.png" width="380" /> |
+| Blends the light color into your theme's card color. Brighter lights give a stronger tint. When off, the card uses your theme's normal card color. | The light's colors as they are, like the original Hue-Like card. |
+
 ```yaml
-type: custom:hue-like-light-card
-title: TV colors
-entities:
-  - light.tvlight_color1
-  - light.tvlight_color2
-  - light.tvlight_color3
-  - light.tvlight_color4
+type: custom:m3-hue-light-card
+entity: light.floor_lamp
+tint: full
 ```
 
-#### Custom title and icon
-![Screen3](/doc/screen3.png)
+## Scenes
+
+Tap the card to open the scene screen, where you can pick a scene or change each light's color and brightness. The card finds scenes from the areas its lights are in, or you can list your own:
+
 ```yaml
-type: custom:hue-like-light-card
-entity: light.livingroom_lamp
-title: Reading light
-icon: mdi:floor-lamp
+type: custom:m3-hue-light-card
+area: Living room
+scenes:
+  - scene.living_room_relax
+  - entity: scene.living_room_movie
+    title: Movie
+    icon: mdi:movie
+    color: purple
 ```
 
-#### No toggle switch
-![Screen7](/doc/screen7.png)
+To use [Scene Presets](https://github.com/Hypfer/hass-scene_presets) as well, add `sceneProvider: [ha-scenes, scene-presets]`. See [Scenes](https://github.com/m3owmixr/m3-hue-light-card/blob/main/doc/configuration.md#scenes) in the reference for colors, ordering and dynamic Hue scenes.
+
+> The scene screen still has the original Hue-Like look. An M3 restyle is coming.
+
+## More examples
+
+**No switch; tap to toggle, hold for scenes**
+
 ```yaml
-type: custom:hue-like-light-card
-title: '[ TV - {{ light.tv_backlight }} ] No switch = more space for title'
+type: custom:m3-hue-light-card
 entity: light.tv_backlight
 icon: mdi:television
 showSwitch: false
 offClickAction: turn-on
 onClickAction: turn-off
-offColor: rgb(28,28,28)
+offHoldAction: hue-screen
+onHoldAction: hue-screen
 ```
 
-#### Home Assistant-like
-![Screen4](/doc/screen4.png)
-```yaml
-type: custom:hue-like-light-card
-title: TV colors
-entities:
-  - light.tvlight_color1
-  - light.tvlight_color2
-  - light.tvlight_color3
-  - light.tvlight_color4
-offColor: theme-color
-hueScreenBgColor: theme-color
-offShadow: false
-hueBorders: false
-```
+**White-only light with a custom color**
 
-#### Turnable with slider
-![Screen5](/doc/screen5.png)
 ```yaml
-type: custom:hue-like-light-card
-title: Living room
-entity: light.livingroom_light
-allowZero: true
-```
-
-#### Custom theme
-![Screen8](/doc/screen8.png)
-```yaml
-type: custom:hue-like-light-card
-title: Living room
-icon: mdi:sofa
-offColor: theme-color
-hueScreenBgColor: theme-color
-offShadow: false
-hueBorders: false
-allowZero: true
-entities:
-  - light.livingroom_light
-  - light.livingroom_color
-theme: synthwave
-```
-
-#### Non-RGB Light
-![Screen6](/doc/screen6.png)
-```yaml
-type: custom:hue-like-light-card
-title: Bathroom
-iconSize: big
+type: custom:m3-hue-light-card
 entity: light.bathroom
 defaultColor: 'rgb(230,230,255)'
 ```
 
-#### No description
-![Screen9](/doc/screen9.png)
+**Turn a scene on with the switch**
+
 ```yaml
-type: custom:hue-like-light-card
-entity: light.office
-description: false
+type: custom:m3-hue-light-card
+area: Office
+switchOnScene: scene.office_bright
 ```
-## Coming soon features
-- reactions on sliding event instead of on change (value will be changed in the moment of sliding, not after)
-- ui editor?
+
+**Open a card's scene screen from another card**
+
+```yaml
+# The M3 Hue Light Card
+type: custom:m3-hue-light-card
+area: Living room
+apiId: living_room
+```
+
+```yaml
+# Any other card
+type: tile
+entity: light.living_room
+tap_action:
+  action: navigate
+  navigation_path: '#m3_hue_card:living_room_openHueScreen'
+```
+
+## Tips
+
+- **Hue icons:** install [hass-hue-icons](https://github.com/arallsopp/hass-hue-icons) to use Philips Hue icons such as `icon: hue:bulb-classic`. The card also uses them automatically where it picks icons itself.
+- **Coming from the original card:** change `type: custom:hue-like-light-card` to `type: custom:m3-hue-light-card`. Your other options keep working, and both cards can be installed at the same time. You can remove `slider: mushroom`; Mushroom is no longer needed.
+
+## Coming next
+
+- **Wavy slider** as an option (`slider_style: wavy`), in the M3 Expressive style
+- **M3 scene screen** to match the card
+
+## Credits and license
+
+This is a fork of [Hue-Like Light Card](https://github.com/Gh61/lovelace-hue-like-light-card) by **Gh61 (Tom Zenkner)**, which provides the light control, the scene screen and the multi-light support. The slider design was inspired by [M3 Cards](https://github.com/j0sp0r/m3-cards) by j0sp0r (MIT).
+
+**What's different from the original:** M3 slider and switch, M3 shapes and type, `tint: harmonized`, Material You colors, and no Mushroom dependency. The scene screen is unchanged so far. Card and API names use `m3` (`custom:m3-hue-light-card`, `#m3_hue_card:`), so this card can be installed next to the original.
+
+Licensed under LGPL-2.1, like the original. See [LICENSE](https://github.com/m3owmixr/m3-hue-light-card/blob/main/LICENSE) and [NOTICE](https://github.com/m3owmixr/m3-hue-light-card/blob/main/NOTICE).
