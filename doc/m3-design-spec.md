@@ -19,7 +19,7 @@ Status: **agreed 2026-10-03** (decisions A–C below). Scope: the collapsed card
 | Elevation | Theme default (`--ha-card-box-shadow`) | same |
 | Padding | **16px** (M3 card padding; was 14px) | same |
 
-`hueBorders` and `offShadow` stay available as options so existing configs still parse, but the new default look is M3.
+`hueBorders` and `offShadow` stay available as options so existing configs still parse, but the new default look is M3. `hueBorders` defaults to `false` (v2.0.0 still defaulted to `true`, so its 10px rule overrode the 28px corners).
 
 ## Header row
 

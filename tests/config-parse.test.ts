@@ -17,6 +17,16 @@ describe('Config parse', () => {
         expect(config.sceneProvider).toStrictEqual([SceneProvider.HaScenes]);
     });
 
+    it('defaults hueBorders to false (M3 corners and theme shadow)', () => {
+        const config = new HueLikeLightCardConfig({ entity: 'light.test' });
+        expect(config.hueBorders).toBe(false);
+    });
+
+    it('parse hueBorders opt-in', () => {
+        const config = new HueLikeLightCardConfig({ entity: 'light.test', hueBorders: true });
+        expect(config.hueBorders).toBe(true);
+    });
+
     it('parse sceneProvider', () => {
         const config = new HueLikeLightCardConfig({
             entity: 'light.test',

@@ -44,7 +44,7 @@ At least one of these is required. Only `light` entities (and `switch` entities)
 | `hueScreenBgColor` | [extended color](#colors) | `#171717` | Background of the scene screen |
 | `theme` | theme name | your HA theme | Use a different installed theme for this card only |
 | `offShadow` | boolean | `true` | `false` removes the inner shadow shown when all lights are off |
-| `hueBorders` | boolean | `true` | Carried over from the original card. `false` takes the card's border and shadow from your Home Assistant theme. |
+| `hueBorders` | boolean | `false` | `true` brings back the original Hue look: 10px corners and a drop shadow on the card and dialog. By default the card uses M3 28px corners and takes its shadow from your Home Assistant theme. |
 
 ### Behavior
 
