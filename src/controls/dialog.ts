@@ -52,13 +52,6 @@ export class HueDialog extends IdLitElement {
     private readonly _selectedLights = new Array<ILightContainer>();
 
     /**
-     * @returns Whether the given light is the only selected light.
-     */
-    private isOnlySelectedLight(light: ILightContainer) {
-        return this._selectedLights.length == 1 && this._selectedLights[0] == light;
-    }
-
-    /**
      * Will add light to collection of selected lights.
      */
     private setSelectedLights(...lights: ILightContainer[]) {
@@ -98,7 +91,31 @@ export class HueDialog extends IdLitElement {
     // lightDetail as history step
     private _lightDetailHistoryStep: HueHistoryStep | undefined;
 
+    /**
+     * The lights section is hidden for a single light: the header switch already does its job (spec).
+     */
+    public static showsLightsSection(lightCount: number): boolean {
+        return lightCount > 1;
+    }
+
     private onLightSelected(ev: CustomEvent<ILightSelectedEventDetail>) {
+        if (ev.detail.lightContainer) {
+            this.openLightDetail(ev.detail.lightContainer);
+        }
+    }
+
+    /**
+     * Opens the light detail (color wheel) for given light, as a history step.
+     */
+    public openLightDetail(light: ILightContainer): void {
+        const show = () => {
+            this.setSelectedLights(light);
+
+            if (this._lightDetailElement) {
+                this._lightDetailElement.lightContainer = <LightController>light;
+                this._lightDetailElement.show();
+            }
+        };
         const hide = () => {
             this.clearSelectedLights();
 
@@ -106,31 +123,14 @@ export class HueDialog extends IdLitElement {
             this._lightDetailElement?.hide();
         };
 
-        // only hide selector if unselected the only one last selected light
-        if (ev.detail.isSelected || !this.isOnlySelectedLight(ev.detail.lightContainer!)) {
-            const show = () => {
-                this.setSelectedLights(ev.detail.lightContainer!);
+        this._lightDetailHistoryStep = new HueHistoryStep(show, hide, HueLightDetail.ElementName);
+        HueHistoryStateManager.instance.addStep(this._lightDetailHistoryStep);
+    }
 
-                // scroll to selected light
-                HueDialog.tileScrollTo(ev.detail.tileElement);
-
-                // set light into detail
-                if (this._lightDetailElement) {
-                    this._lightDetailElement.lightContainer = <LightController>ev.detail.lightContainer;
-                    this._lightDetailElement.show();
-                }
-            };
-
-            // to be in sync
-            (<HueDialogLightTile>ev.detail.tileElement).isSelected = true;
-
-            // show with history
-            this._lightDetailHistoryStep = new HueHistoryStep(show, hide, HueLightDetail.ElementName);
-            HueHistoryStateManager.instance.addStep(this._lightDetailHistoryStep);
-
-        }
-        else {
-            hide();
+    private onTitleKeyDown(ev: KeyboardEvent, light: ILightContainer) {
+        if (ev.key == 'Enter' || ev.key == ' ') {
+            ev.preventDefault();
+            this.openLightDetail(light);
         }
     }
 
@@ -150,14 +150,14 @@ export class HueDialog extends IdLitElement {
             el.classList.toggle('hue-hidden', show);
         });
 
-        // scroll content down to lights
+        // the detail covers the whole content, so lock its scrolling at the top
         const dialogShadowRoot = this.shadowRoot?.querySelector('ha-dialog')?.shadowRoot;
         if (dialogShadowRoot) {
             const contentDiv = dialogShadowRoot.getElementById('content');
             if (contentDiv) {
                 if (show) {
                     contentDiv.style.overflowY = 'hidden';
-                    contentDiv.scrollBy({ top: contentDiv.scrollHeight, behavior: 'smooth' });
+                    contentDiv.scrollTo({ top: 0 });
                 }
                 else {
                     contentDiv.style.overflowY = '';
@@ -562,18 +562,22 @@ export class HueDialog extends IdLitElement {
         margin-bottom: 4px;
     }
 
-    /* Light tiles */
-    .tile-scroller.light-tiles{
-        transition: ${unsafeCSS(Consts.TransitionDefault)};
-        bottom: 100px;
+    /* Light rows (grouped M3 list) */
+    .light-rows {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        margin: ${HueDialog.headerMargin}px 0 ${HueDialog.tileGap}px;
     }
 
-    @media all and (max-width: 450px), all and (max-height: 500px){
-        .detail-active .tile-scroller.light-tiles{
-            position: absolute;
-            bottom: 30px;
-            width: calc(100% - ${2 * HueDialog.haPadding}px);
-        }
+    /* single light: the title opens the color wheel */
+    .main-title.opens-detail {
+        cursor: pointer;
+    }
+    .main-title.opens-detail:focus-visible {
+        outline: 2px solid var(--hue-heading-text-color);
+        outline-offset: 2px;
+        border-radius: 4px;
     }
     `];
     }
@@ -740,6 +744,8 @@ export class HueDialog extends IdLitElement {
         // inspiration: https://github.com/home-assistant/frontend/blob/dev/src/dialogs/more-info/ha-more-info-dialog.ts
 
         const cardTitle = this._config.getTitle(this._ctrl).resolveToString(this._ctrl.hass);
+        const lights = this._ctrl.getLights();
+        const singleLight = !HueDialog.showsLightsSection(lights.length) && lights.length == 1 ? lights[0] : null;
         const mdiClose = 'mdi:close';
         const sceneTiles: ({ kind: 'scene', config: SceneConfig } | { kind: 'preset', config: PresetConfig })[] = [];
         this._config.sceneProvider.forEach(provider => {
@@ -794,13 +800,25 @@ export class HueDialog extends IdLitElement {
               >
               </ha-icon>
             </ha-icon-button>
-            <div
-              slot="title"
-              class="main-title"
-              .title=${cardTitle}
-            >
-              ${cardTitle}
-            </div>
+            ${singleLight
+              ? html`<div
+                  slot="title"
+                  class="main-title opens-detail"
+                  .title=${cardTitle}
+                  role="button"
+                  tabindex="0"
+                  @click=${() => this.openLightDetail(singleLight)}
+                  @keydown=${(e: KeyboardEvent) => this.onTitleKeyDown(e, singleLight)}
+                >
+                  ${cardTitle}
+                </div>`
+              : html`<div
+                  slot="title"
+                  class="main-title"
+                  .title=${cardTitle}
+                >
+                  ${cardTitle}
+                </div>`}
             <div slot="actionItems">
               ${ViewUtils.createM3Switch(this._ctrl, this.onChangeHandler, this._config.switchOnScene)}
             </div>
@@ -831,25 +849,23 @@ export class HueDialog extends IdLitElement {
             </${unsafeStatic(M3PageDots.ElementName)}>
             ` : nothing}
 
+            ${HueDialog.showsLightsSection(lights.length) ? html`
             <div class='header detail-hide'>
                 <div class='title'>${localize(this._ctrl.hass, "dialog.lights")}</div>
             </div>
-            <div class='tile-scroller light-tiles' ${horizontalScroll()}>
-                <div class='tiles'>
-                    ${(this._ctrl.getLights().map((l) =>
-                    html`<${unsafeStatic(HueDialogLightTile.ElementName)}
-                            .cardTitle=${cardTitle}
-                            .lightContainer=${l}
-                            .entityConfig=${this._entitiesConfig.getConfig(l.getEntityId())}
-                            .isSelected=${this._selectedLights.indexOf(l) >= 0}
-                            .isUnselected=${this._selectedLights.length && this._selectedLights.indexOf(l) == -1}
-                            @selected-change=${(e: CustomEvent) => this.onLightSelected(e)}
-                            .defaultColor=${this._config.getDefaultColor()}
-                            .hass=${this._ctrl.hass}
-                            .actionHandler=${this._actionHandler}>
-                        </${unsafeStatic(HueDialogLightTile.ElementName)}>`))}
-                </div>
+            <div class='light-rows detail-hide'>
+                ${(lights.map((l) =>
+                html`<${unsafeStatic(HueDialogLightTile.ElementName)}
+                        .cardTitle=${cardTitle}
+                        .lightContainer=${l}
+                        .entityConfig=${this._entitiesConfig.getConfig(l.getEntityId())}
+                        @selected-change=${(e: CustomEvent<ILightSelectedEventDetail>) => this.onLightSelected(e)}
+                        .defaultColor=${this._config.getDefaultColor()}
+                        .hass=${this._ctrl.hass}
+                        .actionHandler=${this._actionHandler}>
+                    </${unsafeStatic(HueDialogLightTile.ElementName)}>`))}
             </div>
+            ` : nothing}
           </div>
         </ha-dialog>
         `;

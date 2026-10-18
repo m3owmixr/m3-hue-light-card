@@ -5,12 +5,11 @@ import { Color } from '../core/colors/color';
 import { ViewUtils } from '../core/view-utils';
 import { Consts } from '../types/consts';
 import { ISingleLightContainer } from '../types/types-interface';
-import { HueDialogSceneTile } from './dialog-scene-tile';
 import { HueDialogTile, ITileEventDetail } from './dialog-tile';
 import { noop } from '../types/functions';
 import { IconHelper } from '../core/icon-helper';
 import { HueLikeLightCardEntityConfig } from '../types/config';
-import { LimitedTimeout } from '../core/limited-timeout';
+import { localize } from '../localize/localize';
 
 export interface ILightSelectedEventDetail extends ITileEventDetail {
     isSelected: boolean;
@@ -18,7 +17,7 @@ export interface ILightSelectedEventDetail extends ITileEventDetail {
 }
 
 /**
- * Represents Scene tile element in HueDialog.
+ * Represents Light row element in HueDialog (full-width M3 list row, see doc/m3-dialog-spec.md).
  */
 @customElement(HueDialogLightTile.ElementName)
 export class HueDialogLightTile extends HueDialogTile {
@@ -37,133 +36,119 @@ export class HueDialogLightTile extends HueDialogTile {
     @property()
     public defaultColor: Color | null = null;
 
-    @property()
-    public isSelected = false;
+    private static readonly rowHeight = 64; // px
+    private static readonly rowTintAlpha = 0.26;
+    private static readonly badgeTintAlpha = 0.55;
 
-    @property()
-    public isUnselected = false;
-
-    private static readonly titlePadding = 10;
-    private static readonly switchHeight = 45;
-    private static readonly selectorWidth = 2;
-    private static readonly selectorSpacing = 2;
+    /**
+     * @returns Status line of a light row: unavailable, off, brightness in % or on (lights without brightness).
+     */
+    public static statusText(isOn: boolean, isUnavailable: boolean, supportsBrightness: boolean, brightness: number, labels: { on: string, off: string, unavailable: string }): string {
+        if (isUnavailable)
+            return labels.unavailable;
+        if (!isOn)
+            return labels.off;
+        if (supportsBrightness)
+            return `${Math.round(brightness)}%`;
+        return labels.on;
+    }
 
     public static override get styles() {
         return [
             HueDialogTile.hueDialogStyle,
             css`
-    .hue-tile.light{
-        height: ${HueDialogTile.height + HueDialogLightTile.switchHeight}px;
-        background:var(--hue-light-background, ${unsafeCSS(Consts.TileOffColor)});
-        box-shadow:var(--hue-light-box-shadow), ${unsafeCSS(Consts.HueShadow)};
-        transition: ${unsafeCSS(Consts.TransitionDefault)}, ${unsafeCSS(HueDialogTile.clickTransition)};
+    :host {
+        display: block;
     }
-
-    .hue-tile.light.unselected{
-        opacity: 0.7;
-    }
-
-    .selector.active{
-        border: ${HueDialogLightTile.selectorWidth}px solid var(--hue-light-background, ${unsafeCSS(Consts.WarmColor)});
-        padding: ${HueDialogLightTile.selectorSpacing}px;
-        border-radius: ${Consts.HueBorderRadius + HueDialogLightTile.selectorWidth + HueDialogLightTile.selectorSpacing}px;
-        margin: -${HueDialogLightTile.selectorWidth + HueDialogLightTile.selectorSpacing}px
-    }
-
-    .hue-tile.light .tap-area{
+    .hue-tile.light {
         display: flex;
-        flex-flow: column;
-        height: ${HueDialogTile.height}px;
-
-        cursor: pointer;
-    }
-
-    .title{
-        color: var(--hue-light-text-color, ${unsafeCSS(Consts.LightColor)});
-        padding-bottom: ${HueDialogLightTile.titlePadding}px;
-        font-weight: 500;
-    }
-
-    .icon-slot{
-        display: flex;
-        flex-flow: column;
-        text-align: center;
-        height: ${HueDialogTile.height - HueDialogLightTile.titleHeight - HueDialogLightTile.titlePadding}px;
-        /*height: calc(100% - ${HueDialogLightTile.titleHeight}px - ${HueDialogLightTile.titlePadding}px - ${HueDialogLightTile.switchHeight}px);*/
-        justify-content: center;
-    }
-    .icon-slot ha-icon {
-        color: var(--hue-light-text-color, ${unsafeCSS(Consts.LightColor)});
-        transform: scale(${HueDialogSceneTile.iconScale});
-    }
-
-    .switch{
-        display:flex;
-        flex-flow:column;
-        justify-content: center;
         align-items: center;
-
-        height: ${HueDialogLightTile.switchHeight + HueDialogTile.padding}px;
-        background: linear-gradient(rgba(255, 255, 255, 0.1), transparent);
-        border-top: 1px solid rgba(80, 80, 80, 0.1);
-        box-sizing: content-box;
-        margin: 0 -${HueDialogTile.padding}px;
+        gap: 16px;
+        width: 100%;
+        height: ${HueDialogLightTile.rowHeight}px;
+        padding: 0 16px;
+        border-radius: 4px;
+        background: var(--hue-light-row-background, color-mix(in srgb, ${unsafeCSS(Consts.TintOnSurfaceCss)} 7%, transparent));
+        transition: ${unsafeCSS(Consts.TransitionDefault)};
     }
-    .switch ha-switch
-    {
-        /* from HA 2026.5 - compensate for inner label margin */
-        margin-inline-end: -0.5em;
+    /* grouped rows: rounded outer corners only */
+    :host(:first-child) .hue-tile.light {
+        border-top-left-radius: 16px;
+        border-top-right-radius: 16px;
     }
-
+    :host(:last-child) .hue-tile.light {
+        border-bottom-left-radius: 16px;
+        border-bottom-right-radius: 16px;
+    }
+    .tap-area {
+        flex: 1;
+        min-width: 0;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        height: 100%;
+        cursor: pointer;
+        border-radius: 12px;
+    }
+    .tap-area:focus-visible {
+        outline: 2px solid ${unsafeCSS(Consts.TintOnSurfaceCss)};
+        outline-offset: 2px;
+    }
+    .badge {
+        flex: none;
+        width: 40px;
+        height: 40px;
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--hue-light-badge-background, color-mix(in srgb, ${unsafeCSS(Consts.TintOnSurfaceCss)} 10%, transparent));
+        color: ${unsafeCSS(Consts.TintOnSurfaceCss)};
+    }
+    .text {
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+    }
+    .name {
+        /* M3 body-large */
+        color: ${unsafeCSS(Consts.TintOnSurfaceCss)};
+        font-size: var(--md-sys-typescale-body-large-size, 16px);
+        line-height: var(--md-sys-typescale-body-large-line-height, 24px);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .status {
+        /* M3 body-small */
+        color: var(--md-sys-color-on-surface-variant, var(--secondary-text-color));
+        font-size: var(--md-sys-typescale-body-small-size, 12px);
+        line-height: var(--md-sys-typescale-body-small-line-height, 16px);
+    }
+    .switch {
+        flex: none;
+        display: flex;
+        align-items: center;
+    }
     `];
     }
 
-    private readonly _lt: LimitedTimeout = new LimitedTimeout(20);
-
     // Can't be named 'updateStyles', because HA searches for that method and calls it instead of applying theme
     private updateStylesInner(): void {
-        if (this.lightContainer) {
-            if (this.lightContainer.isOn()) {
-                const defaultColorBg = this.defaultColor ? new Background([this.defaultColor]) : null;
-                const bfg = ViewUtils.calculateBackAndForeground(this.lightContainer, null, true, defaultColorBg);
-
-                if (bfg.background) {
-                    this.style.setProperty(
-                        '--hue-light-background',
-                        bfg.background.toString()
-                    );
-                }
-
-                if (bfg.foreground) {
-                    this.style.setProperty(
-                        '--hue-light-text-color',
-                        bfg.foreground.toString()
-                    );
-                }
-            }
-            else {
-                this.style.removeProperty(
-                    '--hue-light-background'
-                );
-                this.style.removeProperty(
-                    '--hue-light-text-color'
-                );
-            }
-
-            const shadow = ViewUtils.calculateDefaultShadow(this, this.lightContainer, false);
-            this.style.setProperty(
-                '--hue-light-box-shadow',
-                shadow
-            );
-
-            // sometimes the element is not yet displayed, so we need to try calculate shadow later
-            if (!shadow) {
-                this._lt.setTimeout(() => this.updateStylesInner(), 100);
-            }
-            else {
-                this._lt.reset();
+        if (this.lightContainer?.isOn()) {
+            // lit row: see-through tint of the light's own color
+            const defaultColorBg = this.defaultColor ? new Background([this.defaultColor]) : null;
+            const color = (this.lightContainer.getBackground() || defaultColorBg)?.colors[0];
+            if (color) {
+                const r = color.getRed(), g = color.getGreen(), b = color.getBlue();
+                this.style.setProperty('--hue-light-row-background', new Color(r, g, b, HueDialogLightTile.rowTintAlpha).toString());
+                this.style.setProperty('--hue-light-badge-background', new Color(r, g, b, HueDialogLightTile.badgeTintAlpha).toString());
+                return;
             }
         }
+
+        this.style.removeProperty('--hue-light-row-background');
+        this.style.removeProperty('--hue-light-badge-background');
     }
 
     protected override updated(changedProps: PropertyValues<HueDialogLightTile>): void {
@@ -179,16 +164,6 @@ export class HueDialogLightTile extends HueDialogTile {
         }
 
         this.updateStylesInner();
-
-        if (changedProps.has('isSelected')) {
-            const selector = <Element>this.renderRoot.querySelector('.selector');
-            selector.classList.toggle('active', !!this.isSelected);
-        }
-
-        if (changedProps.has('isUnselected')) {
-            const tile = <Element>this.renderRoot.querySelector('.hue-tile');
-            tile.classList.toggle('unselected', !!this.isUnselected);
-        }
     }
 
     private lightUpdated() {
@@ -199,13 +174,10 @@ export class HueDialogLightTile extends HueDialogTile {
     protected override clickTarget!: HTMLDivElement;
 
     protected override tileClicked() {
-        // toggle select this light
-        this.isSelected = !this.isSelected;
-
-        // fire event onclick
+        // rows are hidden while the detail is open, so a tap always opens it
         this.dispatchEvent(new CustomEvent<ILightSelectedEventDetail>('selected-change', {
             detail: {
-                isSelected: this.isSelected,
+                isSelected: true,
                 lightContainer: this.lightContainer,
                 tileElement: this
             }
@@ -229,22 +201,32 @@ export class HueDialogLightTile extends HueDialogTile {
         }
 
         const icon = this.entityConfig?.icon ?? this.lightContainer.getIcon() ?? IconHelper.getIcon(1);
+        const status = HueDialogLightTile.statusText(
+            this.lightContainer.isOn(),
+            this.lightContainer.isUnavailable(),
+            this.lightContainer.features.brightness,
+            this.lightContainer.brightnessValue,
+            {
+                on: localize(this._hass, 'dialog.light.on'),
+                off: localize(this._hass, 'dialog.light.off'),
+                unavailable: localize(this._hass, 'dialog.light.unavailable')
+            }
+        );
 
         /*eslint-disable */
         return html`
-        <div class='selector'>
-            <div class='hue-tile light' title='${title}'>
-                <div class='tap-area'>
-                    <div class='icon-slot'>
-                        <ha-icon icon="${icon}"></ha-icon>
-                    </div>
-                    <div class='title'>
-                        <span>${title}</span>
-                    </div>
+        <div class='hue-tile light' title='${title}'>
+            <div class='tap-area'>
+                <div class='badge'>
+                    <ha-icon icon="${icon}"></ha-icon>
                 </div>
-                <div class='switch'>
-                    ${ViewUtils.createSwitch(this.lightContainer, noop)}
+                <div class='text'>
+                    <div class='name'>${title}</div>
+                    <div class='status'>${status}</div>
                 </div>
+            </div>
+            <div class='switch'>
+                ${ViewUtils.createM3Switch(this.lightContainer, noop)}
             </div>
         </div>
         `;
