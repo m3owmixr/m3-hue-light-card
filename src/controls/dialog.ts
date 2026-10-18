@@ -456,6 +456,14 @@ export class HueDialog extends IdLitElement {
     .hue-heading .main-title {
         color:var(--hue-heading-text-color);
     }
+    .hue-heading ha-icon-button {
+        /* the close button otherwise picks up the theme accent */
+        --icon-primary-color: var(--hue-heading-text-color);
+        --wa-color-on-normal: var(--hue-heading-text-color);
+    }
+    .hue-heading ha-icon-button ha-icon {
+        color: var(--hue-heading-text-color);
+    }
     .hue-heading .main-title {
         /* M3 headline-small */
         font-size: var(--md-sys-typescale-headline-small-size, 24px);
