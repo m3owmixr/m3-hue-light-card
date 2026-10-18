@@ -4,6 +4,7 @@
   "card.description.oneLightOn": "1 light is on",
   "card.description.someLightsAreOn": "%s lights are on",
   "dialog.lights": "Lights",
+  "dialog.page": "Page %s",
   "dialog.scenes": "My scenes",
   "effects.candle": "Candle",
   "effects.fireplace": "Fireplace",
