@@ -53,6 +53,17 @@ export class HueDialogLightTile extends HueDialogTile {
         return labels.on;
     }
 
+    /**
+     * @returns Colors of a lit row's switch: the track in the light's color (matching the glow), with a readable handle.
+     */
+    public static switchColors(light: Color): { track: string, handle: string } {
+        const opaque = new Color(light.getRed(), light.getGreen(), light.getBlue());
+        return {
+            track: opaque.toString(),
+            handle: opaque.getForeground('#fff', Consts.TintSurfaceCss, 0)
+        };
+    }
+
     public static override get styles() {
         return [
             HueDialogTile.hueDialogStyle,
@@ -130,6 +141,11 @@ export class HueDialogLightTile extends HueDialogTile {
         display: flex;
         align-items: center;
     }
+    .switch .m3-switch {
+        /* lit row: the switch takes the light's color (set in updateStylesInner), else the theme defaults */
+        --m3-switch-selected-track: var(--hue-row-switch-track, var(--md-sys-color-primary, var(--primary-color)));
+        --m3-switch-selected-handle: var(--hue-row-switch-handle, var(--md-sys-color-on-primary, #fff));
+    }
     `];
     }
 
@@ -143,12 +159,17 @@ export class HueDialogLightTile extends HueDialogTile {
                 const r = color.getRed(), g = color.getGreen(), b = color.getBlue();
                 this.style.setProperty('--hue-light-row-background', new Color(r, g, b, HueDialogLightTile.rowTintAlpha).toString());
                 this.style.setProperty('--hue-light-badge-background', new Color(r, g, b, HueDialogLightTile.badgeTintAlpha).toString());
+                const switchColors = HueDialogLightTile.switchColors(color);
+                this.style.setProperty('--hue-row-switch-track', switchColors.track);
+                this.style.setProperty('--hue-row-switch-handle', switchColors.handle);
                 return;
             }
         }
 
         this.style.removeProperty('--hue-light-row-background');
         this.style.removeProperty('--hue-light-badge-background');
+        this.style.removeProperty('--hue-row-switch-track');
+        this.style.removeProperty('--hue-row-switch-handle');
     }
 
     protected override updated(changedProps: PropertyValues<HueDialogLightTile>): void {

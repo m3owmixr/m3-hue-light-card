@@ -1,3 +1,5 @@
+import { Color } from '../src/core/colors/color';
+import { Consts } from '../src/types/consts';
 import { HueDialog } from '../src/controls/dialog';
 import { HueDialogLightTile } from '../src/controls/dialog-light-tile';
 
@@ -29,5 +31,19 @@ describe('HueDialog.showsLightsSection', () => {
 
     it('shows it for two or more lights', () => {
         expect(HueDialog.showsLightsSection(2)).toBe(true);
+    });
+});
+
+describe('HueDialogLightTile.switchColors', () => {
+    it('fills the track with the light color', () => {
+        expect(HueDialogLightTile.switchColors(new Color('#3050c0')).track).toBe('rgb(48,80,192)');
+    });
+
+    it('uses a white handle on a dark light color', () => {
+        expect(HueDialogLightTile.switchColors(new Color('#3050c0')).handle).toBe('#fff');
+    });
+
+    it('uses the surface as handle on a bright light color', () => {
+        expect(HueDialogLightTile.switchColors(new Color('#ffe9a0')).handle).toBe(Consts.TintSurfaceCss);
     });
 });
