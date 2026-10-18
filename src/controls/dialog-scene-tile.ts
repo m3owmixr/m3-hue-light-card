@@ -13,9 +13,12 @@ export abstract class HueDialogSceneTile extends HueDialogTile {
 
     private readonly _effectQueue = new HueEffectQueue();
 
-    private static readonly pictureDimensions = HueDialogTile.height / 2; // px
+    private static readonly pictureDimensions = HueDialogTile.height / 2; // px (also sizes icons in light tiles)
+    private static readonly pictureWidth = 88; // px
+    private static readonly pictureHeight = 64; // px
     public static readonly iconScale = (HueDialogSceneTile.pictureDimensions * 0.75) / 24; // 24 = default icon size
-    private static readonly animationSeconds = 1.0;
+    /** how long the see-through tint stays after a tap (spec: about 3 seconds) */
+    private static readonly highlightMs = 3000;
 
     protected abstract getTileTitle(): string | undefined;
     protected abstract getTilePicture(): string | undefined;
@@ -38,20 +41,12 @@ export abstract class HueDialogSceneTile extends HueDialogTile {
         // stops the animation and clears the queue
         this._effectQueue.stopAndClear();
 
-        // find tile and start animation
+        // find tile and show the see-through tint for a while (no lasting "active scene", see spec)
         const tileElement = this.renderRoot.querySelector('.scene');
         if (tileElement) {
-            tileElement.classList.remove('clicked', 'unclicked');
-            const animationMs = HueDialogSceneTile.animationSeconds * 1000;
+            tileElement.classList.remove('clicked');
             this._effectQueue.addEffect(0, () => tileElement.classList.add('clicked'));
-            this._effectQueue.addEffect(3000, () => tileElement.classList.add('unclicked'));
-            this._effectQueue.addEffect(animationMs, () => {
-                tileElement.classList.add('stop-color-animate');
-                tileElement.classList.remove('clicked');
-            });
-            this._effectQueue.addEffect(50, () => {
-                tileElement.classList.remove('stop-color-animate', 'unclicked');
-            });
+            this._effectQueue.addEffect(HueDialogSceneTile.highlightMs, () => tileElement.classList.remove('clicked'));
             this._effectQueue.start();
         }
 
@@ -117,79 +112,56 @@ export abstract class HueDialogSceneTile extends HueDialogTile {
             css`
     .scene {
         cursor: pointer;
+        height: auto;
+        padding: 10px 10px 8px;
+        transition: background 0.6s ease-out, box-shadow 0.6s ease-out, ${unsafeCSS(HueDialogTile.clickTransition)};
     }
     .scene .icon-background {
-        height: calc(100% - ${HueDialogTile.titleHeight}px);
         display: flex;
         align-items: center;
         justify-content: center;
+        margin-bottom: 6px;
     }
     .scene .icon-background .color,
-    .scene .icon-background .picture-color {
-        height: ${HueDialogSceneTile.pictureDimensions}px;
-        width: ${HueDialogSceneTile.pictureDimensions}px;
-        border-radius: ${HueDialogSceneTile.pictureDimensions / 2}px;
-        box-shadow: ${unsafeCSS(Consts.HueShadow)}, inset rgba(0,0,0,0.1) -8px -8px 15px;
+    .scene .icon-background .picture-color,
+    .scene .icon-background .picture {
+        width: ${HueDialogSceneTile.pictureWidth}px;
+        height: ${HueDialogSceneTile.pictureHeight}px;
+        border-radius: 12px;
+    }
+    .scene .icon-background .color {
         display: flex;
         align-items: center;
         justify-content: center;
-        transition: all ${HueDialogSceneTile.animationSeconds}s linear;
-    }
-    .scene .icon-background .color {
-        background: var(--hue-tile-accent-color, darkgoldenrod);
+        /* scenes without a picture: their icon on a tinted box the size of a picture */
+        background: color-mix(in srgb, var(--hue-tile-accent-color, var(--md-sys-color-secondary-container, ${unsafeCSS(Consts.TileOffColor)})) 60%, transparent);
     }
     .scene .icon-background .color ha-icon {
-        color: var(--hue-tile-fg-color, ${unsafeCSS(Consts.LightColor)});
+        color: var(--hue-tile-fg-color, ${unsafeCSS(Consts.TintOnSurfaceCss)});
         transform: scale(${HueDialogSceneTile.iconScale});
     }
-    .scene .icon-background .picture-color .picture {
-        display: inline-block;
-        height: ${HueDialogSceneTile.pictureDimensions}px;
-        width: ${HueDialogSceneTile.pictureDimensions}px;
-        border-radius: ${HueDialogSceneTile.pictureDimensions / 2}px;
+    .scene .icon-background .picture {
+        display: block;
         background-position: center;
         background-size: cover;
     }
-
-    .scene.clicked .icon-background .picture-color {
-        background: var(--hue-tile-accent-color, darkgoldenrod);
-    }
-    .scene.clicked .icon-background .color,
-    .scene.clicked .icon-background .picture-color {
-        height: ${HueDialogTile.height * 2}px;
-        width: ${HueDialogTile.width * 2}px;
-        border-radius: ${HueDialogTile.height}px;
-        margin-left: -${HueDialogTile.padding * 2}px;
-        margin-right: -${HueDialogTile.padding * 2}px;
-    }
-    .scene.clicked .icon-background .color ha-icon {
-        animation: pop-icon 0.5s linear 1;
-    }
-    .scene.clicked .icon-background .picture {
-        animation: pop-picture 0.5s linear 1;
-    }
-
-    .scene.unclicked .icon-background .color,
-    .scene.unclicked .icon-background .picture-color {
-        background: transparent;
-    }
-    .scene.stop-color-animate .icon-background .color,
-    .scene.stop-color-animate .icon-background .picture-color {
-        transition: none;
-    }
-
     .scene .title {
-        transition: all ${HueDialogSceneTile.animationSeconds / 2}s linear;
+        height: ${HueDialogTile.titleHeight}px;
+    }
+
+    /* just tapped: see-through tint of the scene's color (spec), fades after a few seconds */
+    .scene.clicked {
+        background: color-mix(in srgb, var(--hue-tile-accent-color, var(--md-sys-color-primary, var(--primary-color))) 38%, transparent);
+        box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--hue-tile-accent-color, var(--md-sys-color-primary, var(--primary-color))) 70%, transparent);
     }
     .scene.clicked .title {
-        color:var(--hue-tile-fg-text-color, ${unsafeCSS(Consts.LightColor)});
+        font-weight: 500;
     }
 
-    @keyframes pop-icon {
-        50% { transform: scale(${HueDialogSceneTile.iconScale * 2}); }
-    }
-    @keyframes pop-picture {
-        50% { transform: scale(1.5); }
+    @media (prefers-reduced-motion: reduce) {
+        .scene {
+            transition: none;
+        }
     }
     `];
     }

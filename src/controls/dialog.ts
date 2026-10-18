@@ -1,6 +1,6 @@
 import { css, nothing, PropertyValues, unsafeCSS } from 'lit';
 import { html, unsafeStatic } from 'lit/static-html.js';
-import { customElement } from 'lit/decorators.js';
+import { customElement, state } from 'lit/decorators.js';
 import { classMap } from 'lit-html/directives/class-map.js';
 import { Background } from '../core/colors/background';
 import { Color } from '../core/colors/color';
@@ -25,6 +25,8 @@ import { localize } from '../localize/localize';
 import { ActionHandler } from '../core/action-handler';
 import { HueDialogSceneHATile } from './dialog-scene-ha-tile';
 import { horizontalScroll } from '../directives/horizontal-scroll';
+import { M3PageDots } from './m3-page-dots';
+import { PageDotsMath } from '../core/page-dots-math';
 
 @customElement(HueDialog.ElementName)
 export class HueDialog extends IdLitElement {
@@ -173,6 +175,80 @@ export class HueDialog extends IdLitElement {
 
     //#region Tile-Scrollers
 
+    @state()
+    private _scenePageCount = 0;
+    @state()
+    private _scenePage = 0;
+
+    private _sceneScroller: HTMLElement | null = null;
+    private _sceneResizeObserver: ResizeObserver | null = null;
+    private _sceneScrollFrame = 0;
+
+    /** Hooks the page dots to the (re)rendered scene scroller. */
+    private attachSceneScroller() {
+        const scroller = this.renderRoot.querySelector<HTMLElement>('.scene-tiles');
+        if (scroller == this._sceneScroller)
+            return;
+
+        this.detachSceneScroller();
+        this._sceneScroller = scroller;
+        if (!scroller)
+            return;
+
+        scroller.addEventListener('scroll', this.onSceneScroll, { passive: true });
+        if (typeof ResizeObserver != 'undefined') {
+            this._sceneResizeObserver = new ResizeObserver(() => this.updatePageDots());
+            this._sceneResizeObserver.observe(scroller);
+        }
+        this.updatePageDots();
+    }
+
+    private detachSceneScroller() {
+        this._sceneScroller?.removeEventListener('scroll', this.onSceneScroll);
+        this._sceneResizeObserver?.disconnect();
+        this._sceneResizeObserver = null;
+        if (this._sceneScrollFrame) {
+            cancelAnimationFrame(this._sceneScrollFrame);
+            this._sceneScrollFrame = 0;
+        }
+        this._sceneScroller = null;
+    }
+
+    private onSceneScroll = () => {
+        if (this._sceneScrollFrame)
+            return;
+
+        this._sceneScrollFrame = requestAnimationFrame(() => {
+            this._sceneScrollFrame = 0;
+            this.updatePageDots();
+        });
+    };
+
+    private updatePageDots() {
+        const s = this._sceneScroller;
+        if (!s)
+            return;
+
+        const count = PageDotsMath.pageCount(s.scrollWidth, s.clientWidth);
+        const page = PageDotsMath.currentPage(s.scrollLeft, s.scrollWidth, s.clientWidth);
+        if (count != this._scenePageCount)
+            this._scenePageCount = count;
+        if (page != this._scenePage)
+            this._scenePage = page;
+    }
+
+    private onScenePageSelect(ev: CustomEvent<{ page: number }>) {
+        const s = this._sceneScroller;
+        if (!s)
+            return;
+
+        const reducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+        s.scrollTo({
+            left: PageDotsMath.pageScrollLeft(ev.detail.page, s.scrollWidth, s.clientWidth),
+            behavior: reducedMotion ? 'auto' : 'smooth'
+        });
+    }
+
     private static tileScrollTo(el: HTMLElement) {
         if (!el)
             return;
@@ -275,6 +351,8 @@ export class HueDialog extends IdLitElement {
 
     /** When the dialog is closed. Removes itself from the DOM. */
     private onDialogClose() {
+        this.detachSceneScroller();
+
         if (this._isRendered) {
             this.remove();
 
@@ -344,7 +422,7 @@ export class HueDialog extends IdLitElement {
 `;
 
     private static readonly headerMargin = 8;
-    private static readonly tileGap = 10;
+    private static readonly tileGap = 8;
     private static readonly haPadding = 24;
 
     public static override get styles() {
@@ -452,34 +530,12 @@ export class HueDialog extends IdLitElement {
         padding: 0 ${HueDialog.haPadding}px;
         margin: 0 -${HueDialog.haPadding}px;
     }
-    /* width */
-    ::-webkit-scrollbar {
-        height: 10px;
+    /* the page dots replace the scrollbar */
+    .tile-scroller {
+        scrollbar-width: none;
     }
-
-    /* Track */
-    ::-webkit-scrollbar-track {
-        background: transparent;
-        /*background: #f1f1f1;*/
-    }
-    
-    /* Handle */
-    ::-webkit-scrollbar-thumb {
-        border-radius: 5px;
-        background: #888; 
-    }
-
-    /* Handle on hover */
-    ::-webkit-scrollbar-thumb:hover {
-        background: #555; 
-    }
-
-    @media screen and (max-width: 768px){
-        ::-webkit-scrollbar {
-            -webkit-appearance: none;
-            height: 0px;
-            background: transparent;
-        }
+    .tile-scroller::-webkit-scrollbar {
+        display: none;
     }
 
     .tiles {
@@ -500,6 +556,10 @@ export class HueDialog extends IdLitElement {
     /* Scene tiles */
     .tile-scroller.scene-tiles{
         min-height: 100px;
+    }
+    .scene-dots {
+        --m3-page-dots-active-color: var(--hue-text-color, ${unsafeCSS(Consts.TintOnSurfaceCss)});
+        margin-bottom: 4px;
     }
 
     /* Light tiles */
@@ -750,8 +810,9 @@ export class HueDialog extends IdLitElement {
             'content': true,
             'detail-active': !!this._selectedLights.length
         })}" tabindex="-1" dialogInitialFocus>
+            ${sceneTiles.length ? html`
             <div class='header detail-hide'>
-                <div class='title'>${sceneTiles.length ? localize(this._ctrl.hass, "dialog.scenes") : nothing}</div>
+                <div class='title'>${localize(this._ctrl.hass, "dialog.scenes")}</div>
             </div>
             <div class='tile-scroller scene-tiles detail-hide' ${horizontalScroll()}>
                 <div class='tiles'>
@@ -761,6 +822,14 @@ export class HueDialog extends IdLitElement {
                     ${(sceneTiles.map((tile, i) => i % 2 == 0 ? nothing : renderSceneTile(tile)))}
                 </div>
             </div>
+            <${unsafeStatic(M3PageDots.ElementName)}
+                class='scene-dots detail-hide'
+                .count=${this._scenePageCount}
+                .current=${this._scenePage}
+                .labelFormat=${localize(this._ctrl.hass, "dialog.page")}
+                @page-select=${(e: CustomEvent<{ page: number }>) => this.onScenePageSelect(e)}>
+            </${unsafeStatic(M3PageDots.ElementName)}>
+            ` : nothing}
 
             <div class='header detail-hide'>
                 <div class='title'>${localize(this._ctrl.hass, "dialog.lights")}</div>
@@ -793,6 +862,7 @@ export class HueDialog extends IdLitElement {
         super.updated(changedProps);
 
         this.updateStylesInner(false);
+        this.attachSceneScroller();
     }
 
     public override connectedCallback(): void {

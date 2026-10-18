@@ -48,8 +48,8 @@ export abstract class HueDialogTile extends IdLitElement {
 
     protected static readonly padding = 5; // px
     protected static readonly height = 90; // px
-    protected static readonly width = 85; // px
-    protected static readonly titleHeight = 35; // px
+    protected static readonly width = 108; // px (M3 scene tile)
+    protected static readonly titleHeight = 36; // px (two lines)
     protected static readonly clickTransition = 'transform .15s';
 
     protected static hueDialogStyle = css`
@@ -57,23 +57,28 @@ export abstract class HueDialogTile extends IdLitElement {
         -webkit-tap-highlight-color: transparent;
     }
     .hue-tile{
-        background: ${unsafeCSS(Consts.TileOffColor)};
+        /* see-through M3 tile over the dialog surface and glow (no blur, spec) */
+        background: color-mix(in srgb, ${unsafeCSS(Consts.TintOnSurfaceCss)} 9%, transparent);
+        box-sizing: border-box;
         width: ${HueDialogTile.width}px;
         height: ${HueDialogTile.height}px;
         padding: ${HueDialogTile.padding}px;
-        border-radius: ${Consts.HueBorderRadius}px;
-        box-shadow: ${unsafeCSS(Consts.HueShadow)};
+        border-radius: 16px;
         overflow:hidden;
         user-select: none;
         transition: ${unsafeCSS(HueDialogTile.clickTransition)};
+    }
+    .hue-tile:focus-visible{
+        outline: 2px solid ${unsafeCSS(Consts.TintOnSurfaceCss)};
+        outline-offset: 2px;
     }
     .hue-tile:not(.no-click):active:hover{
         transform: scale(0.95);
     }
     .title {
-        color:${unsafeCSS(Consts.LightColor)};
-        font-size: 12px;
-        line-height: 15px;
+        color: ${unsafeCSS(Consts.TintOnSurfaceCss)};
+        font-size: 13px;
+        line-height: 18px;
         font-weight:400;
         height:${HueDialogTile.titleHeight}px;
         text-align: center;
@@ -116,8 +121,20 @@ export abstract class HueDialogTile extends IdLitElement {
                 this.tileClicked(e);
             });
             this._gc = new PreventGhostClick(this.clickTarget);
+
+            // keyboard: focusable button, Enter / Space activates
+            this.clickTarget.tabIndex = 0;
+            this.clickTarget.setAttribute('role', 'button');
+            this.clickTarget.addEventListener('keydown', this.onKeyDown);
         }
     }
+
+    private onKeyDown = (ev: KeyboardEvent) => {
+        if (ev.key == 'Enter' || ev.key == ' ') {
+            ev.preventDefault();
+            this.tileClicked();
+        }
+    };
 
     private destroyListeners() {
         if (this._mc) {
@@ -128,6 +145,7 @@ export abstract class HueDialogTile extends IdLitElement {
             this._gc.destroy();
             this._gc = undefined;
         }
+        this.clickTarget?.removeEventListener('keydown', this.onKeyDown);
     }
 
     protected abstract getEntityId(): string | undefined;
@@ -137,7 +155,7 @@ export abstract class HueDialogTile extends IdLitElement {
         this.setupListeners();
     }
 
-    protected abstract tileClicked(event: HammerInput): void;
+    protected abstract tileClicked(event?: HammerInput): void;
 
     protected abstract override updated(changedProps: PropertyValues): void;
 
