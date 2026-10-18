@@ -36,6 +36,30 @@ describe('PageDotsMath.pageScrollLeft', () => {
     });
 });
 
+describe('PageDotsMath window', () => {
+    const scales = (count: number, current: number) =>
+        Array.from({ length: count }, (_, page) => PageDotsMath.dotScale(page, current, count, 7));
+
+    it('shows every dot at full size when they all fit', () => {
+        expect(scales(5, 2)).toEqual([1, 1, 1, 1, 1]);
+        expect(PageDotsMath.windowStart(2, 5, 7)).toBe(0);
+    });
+
+    it('shrinks the dots toward the end when more pages follow', () => {
+        expect(scales(15, 0).slice(0, 8)).toEqual([1, 1, 1, 1, 1, 0.75, 0.5, 0]);
+    });
+
+    it('slides the window with the current page and shrinks both edges', () => {
+        expect(PageDotsMath.windowStart(7, 15, 7)).toBe(4);
+        expect(scales(15, 7).slice(3, 12)).toEqual([0, 0.5, 0.75, 1, 1, 1, 0.75, 0.5, 0]);
+    });
+
+    it('keeps the last pages at full size at the end', () => {
+        expect(PageDotsMath.windowStart(14, 15, 7)).toBe(8);
+        expect(scales(15, 14).slice(7)).toEqual([0, 0.5, 0.75, 1, 1, 1, 1, 1]);
+    });
+});
+
 describe('M3PageDots', () => {
     async function createDots(count: number, current: number) {
         const el = document.createElement(M3PageDots.ElementName) as M3PageDots;
@@ -62,6 +86,13 @@ describe('M3PageDots', () => {
         expect(buttons[1].getAttribute('aria-label')).toBe('Page 2');
         expect(buttons[1].getAttribute('aria-current')).toBe('true');
         expect(buttons[0].hasAttribute('aria-current')).toBe(false);
+    });
+
+    it('hides dots outside the window from assistive tech', async () => {
+        const { buttons } = await createDots(15, 0);
+        expect(buttons[7].getAttribute('aria-hidden')).toBe('true');
+        expect(buttons[7].tabIndex).toBe(-1);
+        expect(buttons[6].hasAttribute('aria-hidden')).toBe(false);
     });
 
     it('fires page-select with the clicked page', async () => {

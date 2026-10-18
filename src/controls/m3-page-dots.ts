@@ -2,9 +2,11 @@ import { LitElement, css, html, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { Consts } from '../types/consts';
+import { PageDotsMath } from '../core/page-dots-math';
 
 /*
- * M3 carousel-style page dots: small dots, the current page drawn as a wider pill.
+ * Dynamic M3 page indicator: the current page is a pill, at most maxVisible dots are shown in a window
+ * that slides with the current page, and dots at a window edge with more pages beyond it shrink.
  * See doc/m3-dialog-spec.md (Scenes).
  *
  * Events:
@@ -29,6 +31,13 @@ export class M3PageDots extends LitElement {
     @property({ type: Number })
     public current = 0;
 
+    /** Most dots shown at once. */
+    @property({ type: Number })
+    public maxVisible = 7;
+
+    private static readonly slot = 12; // px: 6px dot + 6px gap
+    private static readonly activeSlot = 30; // px: 24px pill + 6px gap
+
     /** Accessible label of a dot, %s is replaced with the 1-based page number. */
     @property()
     public labelFormat = 'Page %s';
@@ -45,17 +54,31 @@ export class M3PageDots extends LitElement {
         if (this.count < 2)
             return nothing;
 
+        const visible = Math.min(this.count, this.maxVisible);
+        const start = PageDotsMath.windowStart(this.current, this.count, this.maxVisible);
+        const width = (visible - 1) * M3PageDots.slot + M3PageDots.activeSlot;
+
         return html`
-            <div class="dots">
-                ${Array.from({ length: this.count }, (_, i) => html`
-                    <button
-                        class=${classMap({ dot: true, current: i == this.current })}
-                        aria-label=${this.labelFormat.replace('%s', String(i + 1))}
-                        aria-current=${i == this.current ? 'true' : nothing}
-                        @click=${() => this.select(i)}
-                    ><span></span></button>
-                `)}
+            <div class="window" style="width:${width}px">
+                <div class="track" style="transform:translateX(${-start * M3PageDots.slot}px)">
+                    ${Array.from({ length: this.count }, (_, i) => this.renderDot(i))}
+                </div>
             </div>
+        `;
+    }
+
+    private renderDot(page: number) {
+        const scale = PageDotsMath.dotScale(page, this.current, this.count, this.maxVisible);
+        return html`
+            <button
+                class=${classMap({ dot: true, current: page == this.current })}
+                style="--_scale:${scale}"
+                tabindex=${scale ? 0 : -1}
+                aria-hidden=${scale ? nothing : 'true'}
+                aria-label=${this.labelFormat.replace('%s', String(page + 1))}
+                aria-current=${page == this.current ? 'true' : nothing}
+                @click=${() => this.select(page)}
+            ><span></span></button>
         `;
     }
 
@@ -66,17 +89,27 @@ export class M3PageDots extends LitElement {
                 --_active: var(--m3-page-dots-active-color, var(--md-sys-color-on-surface, var(--primary-text-color)));
                 --_dot: var(--m3-page-dots-color, var(--md-sys-color-on-surface-variant, var(--secondary-text-color)));
             }
-            .dots {
+            .window {
+                margin: 0 auto;
+                overflow: hidden;
+                transition: width 200ms ease-out;
+            }
+            .track {
                 display: flex;
-                justify-content: center;
                 align-items: center;
+                width: max-content;
+                transition: transform 250ms ease-out;
+            }
+            button[aria-hidden] {
+                pointer-events: none;
             }
             button {
                 /* 24px touch target around the 6px dot, 6px visual gap */
+                flex: none;
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                min-width: 12px;
+                width: 12px;
                 height: 24px;
                 padding: 0 3px;
                 margin: 0;
@@ -84,6 +117,7 @@ export class M3PageDots extends LitElement {
                 background: none;
                 cursor: pointer;
                 border-radius: 12px;
+                transition: width 200ms ease-out;
                 -webkit-tap-highlight-color: transparent;
             }
             button span {
@@ -93,7 +127,11 @@ export class M3PageDots extends LitElement {
                 border-radius: 3px;
                 background: var(--_dot);
                 opacity: 0.5;
-                transition: width 200ms ease-out, opacity 200ms ease-out;
+                transform: scale(var(--_scale, 1));
+                transition: width 200ms ease-out, opacity 200ms ease-out, transform 200ms ease-out;
+            }
+            button.current {
+                width: 30px;
             }
             button.current span {
                 width: 24px;
@@ -105,7 +143,7 @@ export class M3PageDots extends LitElement {
                 outline-offset: -2px;
             }
             @media (prefers-reduced-motion: reduce) {
-                button span {
+                .window, .track, button, button span {
                     transition: none;
                 }
             }

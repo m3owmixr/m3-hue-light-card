@@ -68,11 +68,11 @@ The collapsed card now looks like Material 3, but the dialog it opens is still t
 - The rows run to the dialog's right edge so the next tile peeks in, which shows they scroll.
 - **Tiles:**
   - Rounded rectangle (16px radius), **see-through**: on-surface color at a low opacity (around 8–10%) over the glow and surface. **No `backdrop-filter` blur** (performance).
-  - **Picture:** a rounded rectangle (12px radius, landscape, about 88×64 at the default size), replacing the round picture.
+  - **Picture:** a rounded rectangle (12px radius, landscape, about 88×64 at the default size), replacing the round picture. Loaded lazily (`loading="lazy"`, `decoding="async"`), and its accent color is only read on the first tap, because reading it for every preset when the dialog opened made scrolling stutter.
   - **Scenes without a picture** (plain HA scenes): their icon, centered on a tinted rounded rectangle the same size as a picture, so both kinds line up. The tint comes from the scene's accent color (existing `getTileAccentColor`) or a theme fallback.
   - **Name:** below the picture, body-medium-ish 13–14px, one or two lines, ellipsis.
 - **Just-tapped scene:** a **see-through tint** (the scene's accent color, harmonized, at about 35–40% plus a thin outline of the same color), as in mockup 2. **Not** a solid fill (mockup 1). It shows for about **3 seconds after a tap, then fades**, replacing today's grow-and-fill tap animation (the existing `_effectQueue` clicked → unclicked sequence). **No lasting "active scene"** (user decision): neither HA scenes nor scene_presets record which scene is active, because `apply_preset` only sends `light.turn_on` with colors.
-- **Page dots** (M3 carousel-style indicator) below the rows: one dot per "page" (visible width). The current page is a wider pill in the foreground color, the others are small dots in on-surface-variant. Tapping a dot scrolls to that page. Dots update as the user scrolls or swipes. No dots when everything fits on one page.
+- **Page dots** (dynamic M3 page indicator) below the rows: one dot per "page" (visible width), at most 7 shown at once. The current page is a wider pill in the foreground color. The window of dots slides with the current page, and the dots at a window edge with more pages beyond it shrink (75%, then 50%) to show there's more. Tapping a dot scrolls to that page. Dots update as the user scrolls or swipes. No dots when everything fits on one page (user request, 2026-10-17).
 - Mouse-wheel horizontal scrolling (`horizontalScroll` directive) keeps working. The native scrollbar is hidden (the dots replace it).
 
 ## Lights
