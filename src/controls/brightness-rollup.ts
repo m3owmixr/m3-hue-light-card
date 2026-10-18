@@ -286,6 +286,10 @@ export class HueBrightnessRollup extends LitElement {
     #wrapper{
         color: white;
     }
+    #desc{
+        /* the value sits on the dialog surface, not on the bar */
+        color: var(--md-sys-color-on-surface, var(--primary-text-color));
+    }
     #bar{
         position: relative;
         transition: all 0.25s linear;

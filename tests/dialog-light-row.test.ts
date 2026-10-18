@@ -43,7 +43,11 @@ describe('HueDialogLightTile.switchColors', () => {
         expect(HueDialogLightTile.switchColors(new Color('#3050c0')).handle).toBe('#fff');
     });
 
-    it('uses the surface as handle on a bright light color', () => {
-        expect(HueDialogLightTile.switchColors(new Color('#ffe9a0')).handle).toBe(Consts.TintSurfaceCss);
+    it('uses a dark handle on a bright light color', () => {
+        expect(HueDialogLightTile.switchColors(new Color('#ffe9a0')).handle).toBe(Consts.DarkColor.toString());
+    });
+
+    it('uses a dark handle on a pale pink light (better contrast than white)', () => {
+        expect(HueDialogLightTile.switchColors(new Color('#f0a0e8')).handle).toBe(Consts.DarkColor.toString());
     });
 });

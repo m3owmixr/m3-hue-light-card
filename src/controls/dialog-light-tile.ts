@@ -3,6 +3,7 @@ import { customElement, property, query } from 'lit/decorators.js';
 import { Background } from '../core/colors/background';
 import { Color } from '../core/colors/color';
 import { ViewUtils } from '../core/view-utils';
+import { DialogTint } from '../core/dialog-tint';
 import { Consts } from '../types/consts';
 import { ISingleLightContainer } from '../types/types-interface';
 import { HueDialogTile, ITileEventDetail } from './dialog-tile';
@@ -60,7 +61,10 @@ export class HueDialogLightTile extends HueDialogTile {
         const opaque = new Color(light.getRed(), light.getGreen(), light.getBlue());
         return {
             track: opaque.toString(),
-            handle: opaque.getForeground('#fff', Consts.TintSurfaceCss, 0)
+            // whichever handle stands out more from the track
+            handle: DialogTint.contrastRatio(Consts.LightColor, opaque) >= DialogTint.contrastRatio(new Color(0, 0, 0), opaque)
+                ? '#fff'
+                : Consts.DarkColor.toString()
         };
     }
 
