@@ -1,6 +1,6 @@
 # M3 Hue Light Card
 
-[![hacs_badge](https://img.shields.io/badge/HACS-Custom-41BDF5.svg)](https://github.com/hacs/integration) [![Tests](https://github.com/m3owmixr/m3-hue-light-card/actions/workflows/validation.yml/badge.svg)](https://github.com/m3owmixr/m3-hue-light-card/actions/workflows/validation.yml) ![Downloads](https://img.shields.io/github/downloads/m3owmixr/m3-hue-light-card/total.svg)
+[![hacs_badge](https://img.shields.io/badge/HACS-Custom-41BDF5.svg)](https://github.com/hacs/integration) [![Tests](https://github.com/m3owmixr/m3-hue-light-card/actions/workflows/validation.yml/badge.svg)](https://github.com/m3owmixr/m3-hue-light-card/actions/workflows/validation.yml) ![Downloads](https://img.shields.io/github/downloads/m3owmixr/m3-hue-light-card/total)
 
 A Home Assistant light card that takes on the color of your lights, styled for Material 3 and Material You. It's a fork of [Hue-Like Light Card](https://github.com/Gh61/lovelace-hue-like-light-card) by Gh61.
 
