@@ -94,6 +94,6 @@ The new slider replaces `mushroom-slider` and removes the dependency on the mush
 
 ## Out of scope for this pass
 
-- Scene dialog / detail screen restyle (later phase)
+- Light detail screen (color wheel) restyle, a later phase. The scene dialog is specified in `m3-dialog-spec.md`.
 - Color-temperature row on the collapsed card
 - Visual editor changes beyond new options

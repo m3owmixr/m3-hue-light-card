@@ -190,7 +190,7 @@ The text follows your Home Assistant language.
 
 Tapping the card opens the **scene screen**. It shows scenes for the card's lights and lets you change each light's color, color temperature and brightness, like the Philips Hue app.
 
-> The scene screen still has the original Hue-Like look. An M3 restyle is planned.
+> The scene screen follows the card's `tint` and `slider` options. On a card with a single light, the Lights section is hidden; tap the title to open the color wheel.
 
 <p>
   <img alt="Scene screen" src="https://github.com/m3owmixr/m3-hue-light-card/raw/main/doc/hue-screen2.png" height="480" />
