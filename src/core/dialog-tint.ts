@@ -69,9 +69,39 @@ export class DialogTint {
     public static peakColor(light: Color, surface: Color, brightness: number, tint: TintType): Color {
         const base = surface.mix(light, DialogTint.baseAmount(brightness));
         const glow = DialogTint.glowBackground(new Background([light]), surface, tint);
-        const foreground = base.getForeground(Consts.LightColor, Consts.DarkColor, 0);
+        const foreground = DialogTint.foregroundFor(base);
         const opacity = DialogTint.readableGlowOpacity(base, glow, foreground, DialogTint.glowOpacity(brightness, tint, surface));
         return base.mix(glow.colors[0], opacity);
+    }
+
+    /**
+     * Text color for the dialog surface: light or dark, whichever has more contrast
+     * (the luminance breakpoint of Color.getForeground picks white too early on darker light-theme surfaces).
+     */
+    public static foregroundFor(base: Color): Color {
+        const light = DialogTint.contrastRatio(DialogTint.over(Consts.LightColor, base), base);
+        const dark = DialogTint.contrastRatio(DialogTint.over(Consts.DarkColor, base), base);
+        return light >= dark ? Consts.LightColor : Consts.DarkColor;
+    }
+
+    /**
+     * Content text colors (on-surface tokens) for an explicit dialog surface, derived from its foreground.
+     */
+    public static contentColors(foreground: Color): { onSurface: string, onSurfaceVariant: string } {
+        return {
+            onSurface: foreground.toString(),
+            onSurfaceVariant: new Color(foreground.getRed(), foreground.getGreen(), foreground.getBlue(), foreground.getOpacity() * 0.75).toString()
+        };
+    }
+
+    /**
+     * Glow opacity that stays readable when the surface can't be parsed (it may be a light or a dark theme).
+     */
+    public static readableGlowOpacityUnknownBase(glow: Background, opacity: number): number {
+        return Math.min(
+            DialogTint.readableGlowOpacity(new Color(Consts.DialogBgColor), glow, Consts.LightColor, opacity),
+            DialogTint.readableGlowOpacity(new Color('#ffffff'), glow, Consts.DarkColor, opacity)
+        );
     }
 
     /**
@@ -91,9 +121,12 @@ export class DialogTint {
     }
 
     private static isReadable(background: Color, foreground: Color): boolean {
-        // translucent text is seen mixed with what's behind it
-        const opaqueFg = background.mix(new Color(foreground.getRed(), foreground.getGreen(), foreground.getBlue()), foreground.getOpacity());
-        return DialogTint.contrastRatio(opaqueFg, background) >= Consts.DialogMinContrast;
+        return DialogTint.contrastRatio(DialogTint.over(foreground, background), background) >= Consts.DialogMinContrast;
+    }
+
+    /** translucent text is seen mixed with what's behind it */
+    private static over(foreground: Color, background: Color): Color {
+        return background.mix(new Color(foreground.getRed(), foreground.getGreen(), foreground.getBlue()), foreground.getOpacity());
     }
 
     private static relativeLuminance(c: Color): number {

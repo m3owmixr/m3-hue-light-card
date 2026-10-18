@@ -93,7 +93,7 @@ describe('DialogTint glow keeps the text readable', () => {
                 it(`${hex} on ${surfaceName} surface, tint: ${tint}`, () => {
                     const light = new Color(hex);
                     const base = surface.mix(light, DialogTint.baseAmount(100));
-                    const fg = base.getForeground(Consts.LightColor, Consts.DarkColor, 0);
+                    const fg = DialogTint.foregroundFor(base);
                     const peak = DialogTint.peakColor(light, surface, 100, tint);
                     expect(contrast(over(fg, peak), peak)).toBeGreaterThanOrEqual(4.5);
                 });
@@ -143,5 +143,50 @@ describe('DialogTint.averageColor', () => {
 
     it('returns the only color unchanged', () => {
         expect(DialogTint.averageColor(new Background([new Color(10, 20, 30)])).toString()).toBe('rgb(10,20,30)');
+    });
+});
+
+describe('DialogTint.foregroundFor', () => {
+    it('keeps dark text on a light-theme surface tinted by a deep blue light', () => {
+        for (const surface of ['#e6e0e9', '#e6e1e5', '#ece6f0', '#f3edf7']) {
+            const base = new Color(surface).mix(new Color('#0000ff'), DialogTint.baseAmount(100));
+            expect(DialogTint.foregroundFor(base)).toBe(Consts.DarkColor);
+        }
+    });
+
+    it('uses light text on a dark surface', () => {
+        expect(DialogTint.foregroundFor(darkSurface)).toBe(Consts.LightColor);
+    });
+
+    it('keeps text readable at the glow peak on darker light-theme surfaces', () => {
+        for (const surface of ['#e6e0e9', '#ece6f0']) {
+            for (const hex of ['#0000ff', '#ff0000', '#e0457a', '#ffff00']) {
+                const s = new Color(surface);
+                const light = new Color(hex);
+                const base = s.mix(light, DialogTint.baseAmount(100));
+                const fg = DialogTint.foregroundFor(base);
+                const peak = DialogTint.peakColor(light, s, 100, TintType.Harmonized);
+                expect(contrast(over(fg, peak), peak)).toBeGreaterThanOrEqual(4.5);
+            }
+        }
+    });
+});
+
+describe('DialogTint.contentColors', () => {
+    it('derives the content text colors from the foreground', () => {
+        const colors = DialogTint.contentColors(Consts.LightColor);
+        expect(colors.onSurface).toBe('rgb(255,255,255)');
+        expect(colors.onSurfaceVariant).toBe('rgba(255,255,255,0.75)');
+    });
+});
+
+describe('DialogTint.readableGlowOpacityUnknownBase', () => {
+    it('keeps the glow readable on both a light and a dark theme surface', () => {
+        const glow = new Background([new Color('#0000ff')]);
+        const opacity = DialogTint.readableGlowOpacityUnknownBase(glow, 0.72);
+        const white = new Color('#ffffff');
+        const peakOnWhite = white.mix(new Color('#0000ff'), opacity);
+        expect(opacity).toBeLessThan(0.72);
+        expect(contrast(over(Consts.DarkColor, peakOnWhite), peakOnWhite)).toBeGreaterThanOrEqual(4.5);
     });
 });

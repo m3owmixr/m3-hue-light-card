@@ -662,6 +662,9 @@ export class HueDialog extends IdLitElement {
         }
     }
 
+    /** Whether updateStylesInner overrode the content text colors (so it only removes its own values). */
+    private _contentColorsSet = false;
+
     // Can't be named 'updateStyles', because HA searches for that method and calls it instead of applying theme
     private updateStylesInner(isFirst: boolean): void {
         const screenBgColor = this._config.getHueScreenBgColor();
@@ -708,9 +711,25 @@ export class HueDialog extends IdLitElement {
             baseCss = Consts.TintSurfaceCss;
         }
 
-        const foreground = base?.getForeground(Consts.LightColor, Consts.DarkColor, 0) ?? null;
+        const foreground = base ? DialogTint.foregroundFor(base) : null;
         this.style.setProperty('--hue-screen-background', baseCss);
         this.style.setProperty('--hue-switch-handle-color', baseCss);
+
+        // an explicit surface (hueScreenBgColor / offColor) needs matching content text, not the theme's
+        const explicitBase = (useScreenBgColor || useOffColor) && foreground != null;
+        if (explicitBase) {
+            const content = DialogTint.contentColors(foreground);
+            this.style.setProperty('--md-sys-color-on-surface', content.onSurface);
+            this.style.setProperty('--md-sys-color-on-surface-variant', content.onSurfaceVariant);
+            this.style.setProperty('--secondary-text-color', content.onSurfaceVariant);
+            this._contentColorsSet = true;
+        }
+        else if (this._contentColorsSet) {
+            this.style.removeProperty('--md-sys-color-on-surface');
+            this.style.removeProperty('--md-sys-color-on-surface-variant');
+            this.style.removeProperty('--secondary-text-color');
+            this._contentColorsSet = false;
+        }
         if (foreground && (useScreenBgColor || useOffColor || this._ctrl.isOn())) {
             this.style.setProperty('--hue-text-color', foreground.toString());
             this.style.setProperty('--primary-text-color', foreground.toString());
@@ -726,10 +745,10 @@ export class HueDialog extends IdLitElement {
             const glow = DialogTint.glowBackground(lights, surface, this._config.tint);
             let opacity = DialogTint.glowOpacity(this._ctrl.brightnessValue, this._config.tint, surface);
 
-            // keep the text readable where the glow is strongest; an unknown base is treated as the old dark dialog
-            const readableBase = base ?? new Color(Consts.DialogBgColor);
-            const readableFg = foreground ?? Consts.LightColor;
-            opacity = DialogTint.readableGlowOpacity(readableBase, glow, readableFg, opacity);
+            // keep the text readable where the glow is strongest; an unparseable surface may be light or dark
+            opacity = base && foreground
+                ? DialogTint.readableGlowOpacity(base, glow, foreground, opacity)
+                : DialogTint.readableGlowOpacityUnknownBase(glow, opacity);
 
             this.style.setProperty('--hue-glow-background', glow.toString());
             this.style.setProperty('--hue-glow-opacity', opacity.toString());
