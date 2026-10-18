@@ -4,6 +4,7 @@ import { customElement } from 'lit/decorators.js';
 import { classMap } from 'lit-html/directives/class-map.js';
 import { Background } from '../core/colors/background';
 import { Color } from '../core/colors/color';
+import { DialogTint } from '../core/dialog-tint';
 import { AreaLightController } from '../core/area-light-controller';
 import { ViewUtils } from '../core/view-utils';
 import { HueLikeLightCardConfig, HueLikeLightCardEntityConfigCollection } from '../types/config';
@@ -22,7 +23,6 @@ import { LightController } from '../core/light-controller';
 import { HueHistoryStateManager, HueHistoryStep } from './history-state-manager';
 import { localize } from '../localize/localize';
 import { ActionHandler } from '../core/action-handler';
-import { LimitedTimeout } from '../core/limited-timeout';
 import { HueDialogSceneHATile } from './dialog-scene-ha-tile';
 import { horizontalScroll } from '../directives/horizontal-scroll';
 
@@ -39,7 +39,6 @@ export class HueDialog extends IdLitElement {
     https://material-components.github.io/material-components-web-catalog/#/component/dialog
     */
 
-    private readonly _lt: LimitedTimeout = new LimitedTimeout(20);
     private _isRendered = false;
     private _config: HueLikeLightCardConfig;
     private _entitiesConfig: HueLikeLightCardEntityConfigCollection;
@@ -300,9 +299,9 @@ export class HueDialog extends IdLitElement {
     private static readonly haStyleDialog = css`
   ha-dialog,
   ha-adaptive-dialog {
-    --mdc-dialog-min-width: 400px;
-    --mdc-dialog-max-width: 600px;
-    --mdc-dialog-max-width: min(600px, 95vw);
+    /* M3 dialog: max 560px wide, extra-large corners (hueBorders sets --hue-dialog-radius) */
+    --ha-dialog-width-md: 560px;
+    --ha-dialog-border-radius: var(--hue-dialog-radius, var(--md-sys-shape-corner-extra-large, 28px));
     --justify-action-buttons: space-between;
     --dialog-container-padding: var(--safe-area-inset-top, 0)
       var(--safe-area-inset-right, 0) var(--safe-area-inset-bottom, 0)
@@ -362,22 +361,15 @@ export class HueDialog extends IdLitElement {
         pointer-events: none;
     }
 
-    /* same color header */
+    /* header sits on the dialog surface (the glow is drawn behind it) */
     .hue-heading {
-        --hue-heading-text-color: var(--hue-text-color, ${unsafeCSS(Consts.ThemeDialogHeadingColorVar)});
-        
-        background:var(--hue-background, ${unsafeCSS(Consts.ThemeCardBackgroundVar)} );
-        box-shadow:var(--hue-box-shadow), 0px 5px 10px rgba(0,0,0,0.5);
-        transition:${unsafeCSS(Consts.TransitionDefault)};
+        --hue-heading-text-color: var(--hue-text-color, ${unsafeCSS(Consts.TintOnSurfaceCss)});
 
-        border-bottom-left-radius: var(--ha-dialog-border-radius, 28px);
-        border-bottom-right-radius: var(--ha-dialog-border-radius, 28px);
-        padding-bottom: calc(var(--ha-dialog-border-radius, 28px) / 2);
+        background: transparent;
+        transition:${unsafeCSS(Consts.TransitionDefault)};
 
         /* HA will show bottom border when scrolled down */
         border-bottom-width: 0;
-
-        overflow:hidden;
 
         /* is above the backdrop */
         z-index:1;
@@ -386,16 +378,28 @@ export class HueDialog extends IdLitElement {
     .hue-heading .main-title {
         color:var(--hue-heading-text-color);
     }
+    .hue-heading .main-title {
+        /* M3 headline-small */
+        font-size: var(--md-sys-typescale-headline-small-size, 24px);
+        line-height: var(--md-sys-typescale-headline-small-line-height, 32px);
+        font-weight: var(--md-sys-typescale-headline-small-weight, 400);
+    }
     ha-dialog-header {
         --mdc-theme-on-primary: var(--hue-heading-text-color);
         --mdc-theme-primary: transparent;
         flex-shrink: 0;
         display: block;
     }
-    .hue-heading ha-switch {
-        padding: 12px;
-        /* from HA 2026.5 - compensate for inner label margin */
-        margin-inline-end: -0.5em;
+    .hue-heading .m3-switch {
+        margin-inline-end: 12px;
+    }
+    .hue-heading .m3-switch.tinted {
+        /* on a lit dialog: track in the readable foreground color, handle in the surface color behind it */
+        --m3-switch-selected-track: var(--hue-heading-text-color);
+        --m3-switch-selected-handle: var(--hue-switch-handle-color);
+        --m3-switch-unselected-track: transparent;
+        --m3-switch-unselected-outline: var(--hue-heading-text-color);
+        --m3-switch-unselected-handle: var(--hue-heading-text-color);
     }
     .hue-heading .brightness-slider {
         padding: 0 18px 6px;
@@ -424,7 +428,12 @@ export class HueDialog extends IdLitElement {
         margin-bottom: 0;
     }
     .header .title{
-        color: ${unsafeCSS(Consts.ThemeSecondaryTextColorVar)};
+        /* M3 label-medium */
+        color: var(--md-sys-color-on-surface-variant, ${unsafeCSS(Consts.ThemeSecondaryTextColorVar)});
+        font-size: var(--md-sys-typescale-label-medium-size, 12px);
+        line-height: var(--md-sys-typescale-label-medium-line-height, 16px);
+        font-weight: var(--md-sys-typescale-label-medium-weight, 500);
+        letter-spacing: var(--md-sys-typescale-label-medium-tracking, 0.5px);
     }
 
     .content {
@@ -513,7 +522,7 @@ export class HueDialog extends IdLitElement {
     private _lightDetailElement: HueLightDetail | null = null;
 
     private tryCreateBackdropAndLightDetail(throwError = false) {
-        // Allow gradient backdrop on dialog
+        // Glow of the light colors behind the header, fading out partway down the scenes
         if (!this._backdropSet || !this._lightDetailElement) {
 
             // Trying to find surface element (it's not available during first load)
@@ -530,10 +539,12 @@ export class HueDialog extends IdLitElement {
                     backdropElement.style.width = '100%';
                     backdropElement.style.height = '100%';
                     backdropElement.style.borderRadius = 'var(--ha-dialog-border-radius, 28px)'; // same as dialog
-                    backdropElement.style.background = 'var(--hue-background)';
+                    backdropElement.style.background = 'var(--hue-glow-background, transparent)';
+                    backdropElement.style.opacity = 'var(--hue-glow-opacity, 0)';
+                    backdropElement.style.pointerEvents = 'none';
                     backdropElement.style.transition = Consts.TransitionDefault;
 
-                    const mask = 'linear-gradient(rgba(255, 255, 255, .25) 0%, transparent 70%)';
+                    const mask = 'radial-gradient(120% 60% at 50% 0%, #000 0%, rgba(0, 0, 0, .45) 45%, transparent 80%)';
                     backdropElement.style.mask = mask;
                     backdropElement.style.webkitMask = mask;
                     //backdropElement.style.zIndex = '0';
@@ -550,7 +561,7 @@ export class HueDialog extends IdLitElement {
                     const detailElement = new HueLightDetail();
                     detailElement.style.position = 'absolute';
                     detailElement.style.width = '100%';
-                    detailElement.style.height = 'calc(100% - 200px)';
+                    detailElement.style.height = '100%';
                     detailElement.style.zIndex = '2'; // over header
 
                     detailElement.areaController = this._ctrl;
@@ -581,94 +592,79 @@ export class HueDialog extends IdLitElement {
 
     // Can't be named 'updateStyles', because HA searches for that method and calls it instead of applying theme
     private updateStylesInner(isFirst: boolean): void {
-        const configBgColor = this._config.getHueScreenBgColor();
+        const screenBgColor = this._config.getHueScreenBgColor();
+        const offColor = this._config.getOffColor();
+        const useScreenBgColor = this._config.wasHueScreenBgColorSet;
+        const useOffColor = this._ctrl.isOff() && this._config.wasOffColorSet && !offColor.isThemeColor();
 
-        // ## Content styles
         if (isFirst) {
             // apply theme
             ThemeHelper.applyTheme(this, this._ctrl.hass.themes, this._config.theme);
 
             // To help change themes on the fly
-            ThemeHelper.setDialogThemeStyles(this, '--hue-screen-background', configBgColor.isThemeColor() || this._config.getOffColor().isThemeColor());
-
-            let contentBg = null;
-            let contentFg = null;
-            if (!configBgColor.isThemeColor()) {
-                contentBg = configBgColor;
-                contentFg = contentBg.getForeground(Consts.DialogFgLightColor, Consts.DarkColor, +120); // for most colors use dark
-
-                this.style.setProperty(
-                    '--hue-screen-background',
-                    contentBg.toString()
-                );
-                this.style.setProperty(
-                    '--primary-text-color',
-                    contentFg.toString()
-                );
-            }
-            else {
-                this.style.setProperty(
-                    '--hue-screen-back-button-color',
-                    Consts.ThemePrimaryTextColorVar
-                );
-            }
+            ThemeHelper.setDialogThemeStyles(this, '--hue-screen-background', useScreenBgColor && screenBgColor.isThemeColor());
         }
-
-        // ## Heading styles
-        const heading = <Element>this.renderRoot.querySelector('.hue-heading');
-        if (!heading)
-            throw new Error('Hue heading not found!');
-
-        let offBackground: Background | null;
-        // if the user sets custom off color - use it
-        if (this._config.wasOffColorSet) {
-            const offColor = this._config.getOffColor();
-            if (!offColor.isThemeColor()) {
-                offBackground = new Background([offColor.getBaseColor()]);
-            }
-            else {
-                offBackground = null;
-            }
-        }
-        else {
-            offBackground = new Background([new Color(Consts.DialogOffColor)]);
-        }
-
-        const bfg = ViewUtils.calculateBackAndForeground(this._ctrl, offBackground, true);
-        const shadow = ViewUtils.calculateDefaultShadow(heading, this._ctrl, this._config.offShadow);
 
         if (this._config.hueBorders) {
-            this.style.setProperty(
-                '--ha-dialog-border-radius',
-                Consts.HueBorderRadius + 'px'
-            );
+            this.style.setProperty('--hue-dialog-radius', Consts.HueBorderRadius + 'px');
         }
 
-        this.style.setProperty(
-            '--hue-background',
-            bfg.background?.toString() ?? Consts.ThemeCardBackgroundVar
-        );
-        this.style.setProperty(
-            '--hue-box-shadow',
-            shadow
-        );
+        // ## Base surface and foreground (spec: lightly harmonized surface, the glow carries most of the color)
+        const surface = ThemeHelper.getTintSurface(this);
+        const defaultColorBg = new Background([this._config.getDefaultColor()]);
 
-        if (bfg.foreground != null) {
-            this.style.setProperty(
-                '--hue-text-color',
-                bfg.foreground.toString()
-            );
+        // base: the actual color (when known) used to keep the glow readable
+        let base: Color | null = null;
+        let baseCss: string;
+        if (useScreenBgColor || useOffColor) {
+            const color = useOffColor ? offColor : screenBgColor;
+            if (color.isThemeColor()) {
+                baseCss = Consts.ThemeCardBackgroundVar;
+            }
+            else {
+                base = color.getBaseColor();
+                baseCss = base.toString();
+            }
+        }
+        else if (this._ctrl.isOn() && surface) {
+            const bfg = ViewUtils.calculateBackAndForeground(this._ctrl, null, false, defaultColorBg, surface, Consts.DialogBaseTintFactor);
+            base = bfg.background ? DialogTint.averageColor(bfg.background) : surface;
+            baseCss = base.toString();
         }
         else {
-            this.style.removeProperty('--hue-text-color');
+            base = surface;
+            baseCss = Consts.TintSurfaceCss;
         }
 
-        // sometimes the element is not yet displayed, so we need to try calculate shadow later
-        if (!shadow) {
-            this._lt.setTimeout(() => this.updateStylesInner(false), 100);
+        const foreground = base?.getForeground(Consts.LightColor, Consts.DarkColor, 0) ?? null;
+        this.style.setProperty('--hue-screen-background', baseCss);
+        this.style.setProperty('--hue-switch-handle-color', baseCss);
+        if (foreground && (useScreenBgColor || useOffColor || this._ctrl.isOn())) {
+            this.style.setProperty('--hue-text-color', foreground.toString());
+            this.style.setProperty('--primary-text-color', foreground.toString());
         }
         else {
-            this._lt.reset();
+            this.style.setProperty('--hue-text-color', Consts.TintOnSurfaceCss);
+            this.style.removeProperty('--primary-text-color');
+        }
+
+        // ## Glow
+        if (this._ctrl.isOn()) {
+            const lights = this._ctrl.getBackground() || defaultColorBg;
+            const glow = DialogTint.glowBackground(lights, surface, this._config.tint);
+            let opacity = DialogTint.glowOpacity(this._ctrl.brightnessValue, this._config.tint, surface);
+
+            // keep the text readable where the glow is strongest; an unknown base is treated as the old dark dialog
+            const readableBase = base ?? new Color(Consts.DialogBgColor);
+            const readableFg = foreground ?? Consts.LightColor;
+            opacity = DialogTint.readableGlowOpacity(readableBase, glow, readableFg, opacity);
+
+            this.style.setProperty('--hue-glow-background', glow.toString());
+            this.style.setProperty('--hue-glow-opacity', opacity.toString());
+        }
+        else {
+            // keep the last glow colors, so it fades out
+            this.style.setProperty('--hue-glow-opacity', '0');
         }
     }
 
@@ -746,7 +742,7 @@ export class HueDialog extends IdLitElement {
               ${cardTitle}
             </div>
             <div slot="actionItems">
-              ${ViewUtils.createSwitch(this._ctrl, this.onChangeHandler, this._config.switchOnScene)}
+              ${ViewUtils.createM3Switch(this._ctrl, this.onChangeHandler, this._config.switchOnScene)}
             </div>
             ${ViewUtils.createSlider(this._ctrl, this._config, this.onChangeHandler)}
           </ha-dialog-header>

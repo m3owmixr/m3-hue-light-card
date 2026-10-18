@@ -75,6 +75,13 @@ export class DialogTint {
     }
 
     /**
+     * Average of all colors of a background (the dialog surface must be a single color).
+     */
+    public static averageColor(background: Background): Color {
+        return background.colors.reduce((avg, c, i) => avg.mix(c, 1 / (i + 1)));
+    }
+
+    /**
      * WCAG contrast ratio of two opaque colors.
      */
     public static contrastRatio(a: Color, b: Color): number {

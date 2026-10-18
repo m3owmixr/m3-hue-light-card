@@ -134,3 +134,14 @@ describe('ViewUtils.calculateBackAndForeground tintScale', () => {
         expect(bfg.background?.toString()).toBe(expected.toString());
     });
 });
+
+describe('DialogTint.averageColor', () => {
+    it('averages all colors of a background', () => {
+        const avg = DialogTint.averageColor(new Background([new Color(200, 0, 0), new Color(0, 0, 100)]));
+        expect([avg.getRed(), avg.getGreen(), avg.getBlue()]).toEqual([100, 0, 50]);
+    });
+
+    it('returns the only color unchanged', () => {
+        expect(DialogTint.averageColor(new Background([new Color(10, 20, 30)])).toString()).toBe('rgb(10,20,30)');
+    });
+});
