@@ -25,8 +25,9 @@ class HorizontalScrollDirective extends Directive {
         const scroller = new SmoothHorizontalScroller(el);
 
         const onWheel = (e: WheelEvent) => {
-            // Ignore purely horizontal wheel events (e.g. trackpad)
-            if (e.deltaY === 0) return;
+            // Only take over mostly-vertical movement (a mouse wheel). A sideways trackpad swipe always has a little
+            // vertical movement too; taking those events over cancelled the native scroll and made swiping stutter.
+            if (Math.abs(e.deltaY) <= Math.abs(e.deltaX)) return;
 
             const maxScrollLeft = el.scrollWidth - el.clientWidth;
             // Nothing to scroll if content fits
