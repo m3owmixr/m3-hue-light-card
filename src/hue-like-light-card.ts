@@ -508,7 +508,7 @@ export class HueLikeLightCard extends IdLitElement implements LovelaceCard {
                 <ha-icon icon="${this._config.icon || this._ctrl.getIcon()}"></ha-icon>
                 <div class="${classMap(textClass)}">
                         <h2>${title}</h2>
-                        <div class="desc">${description}</div>
+                        ${description ? html`<div class="desc">${description}</div>` : nothing}
                     </div>
                 </div>
                 ${showSwitch ? ViewUtils.createM3Switch(this._ctrl, this.onChangeHandler, this._config.switchOnScene) : nothing}

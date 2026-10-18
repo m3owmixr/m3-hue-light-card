@@ -177,7 +177,7 @@ With [hass-hue-icons](https://github.com/arallsopp/hass-hue-icons) installed, th
 
 ## Description
 
-When `description` isn't set, the card picks one of these, in this order:
+When `description` isn't set, a card with a single light shows no description. A card with several lights picks one of these, in this order:
 
 - no lights on
 - all lights on

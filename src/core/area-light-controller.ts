@@ -238,6 +238,10 @@ export class AreaLightController implements ILightContainer, INotifyGeneric<Ligh
             }
             result = '';
         }
+        else if (total == 1) {
+            // a single light: the switch already shows whether it's on
+            result = '';
+        }
         else if (lit == 0) {
             result = localize(this.hass, 'card.description.noLightsOn');
         }
