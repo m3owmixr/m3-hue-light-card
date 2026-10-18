@@ -114,11 +114,12 @@ export class ViewUtils {
      * @param assumeShadow If turned off, calculates foreground for max brightness (noShadow).
      * @param defaultColor Default color, if light does not provide his color.
      * @param tintSurface When set (tint: harmonized), the light colors are mixed into this surface before the foreground is calculated.
+     * @param tintScale Multiplier for the harmonized mix amount (the scene dialog uses a lighter tint than the card).
      */
-    public static calculateBackAndForeground(ctrl: ILightContainer, offBackground: Background | null, assumeShadow = true, defaultColor: Background | null = offBackground, tintSurface: Color | null = null) {
+    public static calculateBackAndForeground(ctrl: ILightContainer, offBackground: Background | null, assumeShadow = true, defaultColor: Background | null = offBackground, tintSurface: Color | null = null, tintScale = 1) {
         let currentBackground = ctrl.isOff() ? offBackground : (ctrl.getBackground() || defaultColor || offBackground);
         if (tintSurface && ctrl.isOn() && currentBackground && currentBackground !== offBackground) {
-            currentBackground = currentBackground.mixInto(tintSurface, ViewUtils.harmonizedTintAmount(ctrl.brightnessValue));
+            currentBackground = currentBackground.mixInto(tintSurface, ViewUtils.harmonizedTintAmount(ctrl.brightnessValue) * tintScale);
         }
 
         let foreground: Color | null;

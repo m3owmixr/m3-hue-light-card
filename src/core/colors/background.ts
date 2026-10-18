@@ -64,6 +64,13 @@ export class Background {
     }
 
     /**
+     * All colors of this background (sorted as in the gradient).
+     */
+    public get colors(): readonly Color[] {
+        return this._colors;
+    }
+
+    /**
      * The last (rightmost in the gradient) color of this background.
      */
     public get lastColor(): Color {

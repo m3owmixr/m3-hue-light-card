@@ -32,6 +32,22 @@ export class Consts {
     public static readonly HarmonizedTintAmount = 0.45;
     /** tint: harmonized - share at the lowest brightness; brightness is shown by tint strength instead of the dark shadow */
     public static readonly HarmonizedTintAmountMin = 0.15;
+    /** scene dialog - the base surface takes this share of the card's harmonized tint; the glow carries most of the color */
+    public static readonly DialogBaseTintFactor = 0.4;
+    /** scene dialog, tint: harmonized - share of the light color mixed into the surface for the glow color (0..1) */
+    public static readonly DialogGlowMix = 0.7;
+    /** scene dialog - glow opacity at the lowest brightness (dark theme) */
+    public static readonly DialogGlowOpacityMin = 0.25;
+    /** scene dialog - glow opacity at full brightness (dark theme) */
+    public static readonly DialogGlowOpacity = 0.6;
+    /** scene dialog - glow opacity multiplier on a light theme surface, where a strong glow looks washed out */
+    public static readonly DialogGlowLightThemeFactor = 0.6;
+    /** scene dialog, tint: full - glow opacity multiplier */
+    public static readonly DialogGlowFullFactor = 1.2;
+    /** scene dialog - hard cap for the glow opacity, keeps the text readable */
+    public static readonly DialogGlowOpacityMax = 0.75;
+    /** scene dialog - minimal contrast (WCAG) of the text where the glow is strongest */
+    public static readonly DialogMinContrast = 4.5;
     /** theme surface used for tint: harmonized, most specific first */
     public static readonly TintSurfaceVariables = ['--md-sys-color-surface-container-high', '--ha-card-background', '--card-background-color'];
     /** tint: harmonized off card, applied as CSS so it doesn't depend on parsing the theme value */
