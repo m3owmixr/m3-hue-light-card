@@ -120,6 +120,7 @@ export class HueLikeLightCardConfig extends HueLikeLightCardEntityConfig impleme
         this.offColor = plainConfig.offColor || Consts.OffColor;
         this.wasOffColorSet = !!plainConfig.offColor;
         this.hueScreenBgColor = plainConfig.hueScreenBgColor || Consts.DialogBgColor;
+        this.wasHueScreenBgColorSet = !!plainConfig.hueScreenBgColor;
         this.offShadow = HueLikeLightCardConfig.getBoolean(plainConfig.offShadow, true);
         this.hueBorders = HueLikeLightCardConfig.getBoolean(plainConfig.hueBorders, false);
         this.apiId = plainConfig.apiId;
@@ -332,6 +333,12 @@ export class HueLikeLightCardConfig extends HueLikeLightCardEntityConfig impleme
      * Returns false, when offColor is taken from Consts.
      */
     public readonly wasOffColorSet: boolean;
+
+    /**
+     * Returns whether hueScreenBgColor was set in configuration.
+     * When false, the scene screen uses the theme surface.
+     */
+    public readonly wasHueScreenBgColorSet: boolean;
 
     /**
      * @returns List of unique entity identifiers

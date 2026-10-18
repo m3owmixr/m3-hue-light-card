@@ -41,7 +41,7 @@ At least one of these is required. Only `light` entities (and `switch` entities)
 | `showSwitch` | boolean | `true` | `false` hides the on/off switch, which gives the title more room. You can then use [tap actions](#tap-and-hold-actions) to turn the lights on and off. |
 | `defaultColor` | [color](#colors) | `warm` | Color used for lights that don't report a color (white-only or switch entities) |
 | `offColor` | [extended color](#colors) | theme surface (`harmonized`), `#666` (`full`) | Card color when all lights are off. Also used in the scene screen header. |
-| `hueScreenBgColor` | [extended color](#colors) | `#171717` | Background of the scene screen |
+| `hueScreenBgColor` | [extended color](#colors) | theme surface | Background of the scene screen. When not set, the scene screen uses the theme surface (`--md-sys-color-surface-container-high`), tinted by the lights. |
 | `theme` | theme name | your HA theme | Use a different installed theme for this card only |
 | `offShadow` | boolean | `true` | `false` removes the inner shadow shown when all lights are off |
 | `hueBorders` | boolean | `false` | `true` brings back the original Hue look: 10px corners and a drop shadow on the card and dialog. By default the card uses M3 28px corners and takes its shadow from your Home Assistant theme. |

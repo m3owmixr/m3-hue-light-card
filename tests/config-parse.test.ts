@@ -22,6 +22,17 @@ describe('Config parse', () => {
         expect(config.hueBorders).toBe(false);
     });
 
+    it('leaves hueScreenBgColor unset by default (theme surface)', () => {
+        const config = new HueLikeLightCardConfig({ entity: 'light.test' });
+        expect(config.wasHueScreenBgColorSet).toBe(false);
+    });
+
+    it('parse hueScreenBgColor', () => {
+        const config = new HueLikeLightCardConfig({ entity: 'light.test', hueScreenBgColor: '#123456' });
+        expect(config.wasHueScreenBgColorSet).toBe(true);
+        expect(config.getHueScreenBgColor().getBaseColor().toString()).toBe('rgb(18,52,86)');
+    });
+
     it('parse hueBorders opt-in', () => {
         const config = new HueLikeLightCardConfig({ entity: 'light.test', hueBorders: true });
         expect(config.hueBorders).toBe(true);
