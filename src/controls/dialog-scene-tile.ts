@@ -35,6 +35,9 @@ export abstract class HueDialogSceneTile extends HueDialogTile {
         // vibrate a little
         forwardHaptic('light');
 
+        // the tint color of a picture tile is read on the first tap
+        this.loadAccentColor();
+
         // activate scene
         this.activateTile();
 
@@ -58,21 +61,35 @@ export abstract class HueDialogSceneTile extends HueDialogTile {
         }));
     }
 
+    private _accentLoaded = false;
+
     protected override updated(changedProps: PropertyValues) {
         if (this.isTileDataChanged(changedProps)) {
-            this.getTileAccentColor().then(accentColor => {
-                if (!accentColor) {
-                    return;
-                }
+            this._accentLoaded = false;
 
-                const fg = accentColor.getForeground(Consts.LightColor, Consts.DarkColor, 20);
-                const textFg = accentColor.getForeground(Consts.LightColor, new Color('black'), 20);
-
-                this.style.setProperty('--hue-tile-accent-color', accentColor.toString());
-                this.style.setProperty('--hue-tile-fg-color', fg.toString());
-                this.style.setProperty('--hue-tile-fg-text-color', textFg.toString());
-            });
+            // reading a picture's color decodes the whole image on the main thread, which made scrolling stutter
+            // with many scene presets; it's only needed for the tap tint, so it waits for the first tap
+            if (!this.getTilePicture()) {
+                this.loadAccentColor();
+            }
         }
+    }
+
+    private loadAccentColor() {
+        if (this._accentLoaded)
+            return;
+
+        this._accentLoaded = true;
+        this.getTileAccentColor().then(accentColor => {
+            if (!accentColor) {
+                return;
+            }
+
+            const fg = accentColor.getForeground(Consts.LightColor, Consts.DarkColor, 20);
+
+            this.style.setProperty('--hue-tile-accent-color', accentColor.toString());
+            this.style.setProperty('--hue-tile-fg-color', fg.toString());
+        });
     }
 
     protected override render() {
@@ -90,7 +107,7 @@ export abstract class HueDialogSceneTile extends HueDialogTile {
                 ${picture
                 ? html`
                     <div class='picture-color'>
-                        <div class='picture' style='background-image:url("${picture}")'></div>
+                        <img class='picture' src="${picture}" alt="" loading="lazy" decoding="async" draggable="false">
                     </div>`
                 : html`
                     <div class='color'>
@@ -142,8 +159,7 @@ export abstract class HueDialogSceneTile extends HueDialogTile {
     }
     .scene .icon-background .picture {
         display: block;
-        background-position: center;
-        background-size: cover;
+        object-fit: cover;
     }
     .scene .title {
         height: ${HueDialogTile.titleHeight}px;
