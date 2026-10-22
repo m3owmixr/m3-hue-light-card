@@ -1,12 +1,8 @@
 import { LitElement, PropertyValues, css, html, nothing, unsafeCSS } from 'lit';
 import { classMap } from 'lit-html/directives/class-map.js';
-import { cache } from 'lit/directives/cache.js';
 import { customElement, property } from 'lit/decorators.js';
 import { Consts } from '../types/consts';
 import { HueColorTempPicker, HueColorTempPickerMode } from './color-temp-picker';
-import { ControlResources } from './control-resources';
-import { ViewUtils } from '../core/view-utils';
-import { HaIcon } from '../types/types-hass';
 
 export type HueColorTempModeSelectorMode = HueColorTempPickerMode | 'brightness';
 
@@ -35,6 +31,10 @@ export class HueColorTempModeSelector extends LitElement {
 
     @property()
     public colorPicker: HueColorTempPicker | null = null;
+
+    /** Accessible names of the options (localized by the light detail). */
+    @property()
+    public labels: { color: string, temp: string } = { color: 'Color', temp: 'Temperature' };
 
     /**
      * Will select possible mode based on current property settings.
@@ -73,116 +73,95 @@ export class HueColorTempModeSelector extends LitElement {
             }
         }
 
-        if (changedProps.has('mode') && this.mode == 'brightness') {
-            const haIcon = <HaIcon>this.renderRoot.querySelector('.wheel.brightness ha-icon');
-            ViewUtils.setIconSize(haIcon, HueColorTempModeSelector.wheelHeight);
-        }
     }
 
-    private static readonly wheelHeight = 24; // same as default icon size
-    private static readonly wheelSpace = 2;
-    private static readonly wheelBorderWidth = 2;
-    private static readonly wrapperHeight = HueColorTempModeSelector.wheelHeight + 2 * (HueColorTempModeSelector.wheelSpace + HueColorTempModeSelector.wheelBorderWidth);
-    private static readonly totalPadding = 8;
-    private static readonly wrapperGap = HueColorTempModeSelector.totalPadding;
-    public static readonly totalHeight = HueColorTempModeSelector.wrapperHeight + 2 * HueColorTempModeSelector.totalPadding;
+    /**
+     * @returns Whether the toggle is shown: it needs two modes to choose from (spec: a single-mode light hides it).
+     */
+    public static shouldRender(mode: HueColorTempModeSelectorMode, showColor: boolean, showTemp: boolean): boolean {
+        return mode != 'brightness' && showColor && showTemp;
+    }
 
+    private static readonly trackPadding = 4;
+    private static readonly optionWidth = 52;
+    private static readonly optionHeight = 40;
+    private static readonly iconSize = 22;
+    public static readonly totalHeight = HueColorTempModeSelector.optionHeight + 2 * HueColorTempModeSelector.trackPadding;
+
+    private static readonly textColorCss = `var(--hue-text-color, ${Consts.TintOnSurfaceCss})`;
+
+    /* M3 Expressive connected toggle, drawn in the screen's text color (see doc/m3-wheel-spec.md) */
     public static override styles = css`
     :host{
         user-select: none;
         -webkit-user-select: none;
-        display:inline-block;
+        display: inline-block;
     }
-    .controls{
+    .track{
         box-sizing: border-box;
         display: flex;
+        gap: 2px;
         height: ${HueColorTempModeSelector.totalHeight}px;
-        padding: ${HueColorTempModeSelector.totalPadding}px;
-        gap: ${HueColorTempModeSelector.wrapperGap}px;
+        padding: ${HueColorTempModeSelector.trackPadding}px;
         border-radius: ${HueColorTempModeSelector.totalHeight / 2}px;
-        box-shadow: ${unsafeCSS(Consts.HueShadow)};
-        background: ${unsafeCSS(Consts.TileOffColor)};
+        background: color-mix(in srgb, ${unsafeCSS(HueColorTempModeSelector.textColorCss)} 12%, transparent);
     }
-    .controls .wheel-wrapper{
-        box-sizing: border-box;
-        width: ${HueColorTempModeSelector.wrapperHeight}px;
-        height: ${HueColorTempModeSelector.wrapperHeight}px;
-        padding: ${HueColorTempModeSelector.wheelSpace}px;
-        border-radius: ${HueColorTempModeSelector.wrapperHeight / 2}px;
-        border: ${HueColorTempModeSelector.wheelBorderWidth}px solid transparent;
+    .option{
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: ${HueColorTempModeSelector.optionWidth}px;
+        height: ${HueColorTempModeSelector.optionHeight}px;
+        padding: 0;
+        border: none;
+        border-radius: ${HueColorTempModeSelector.optionHeight / 2}px;
+        background: transparent;
+        color: ${unsafeCSS(HueColorTempModeSelector.textColorCss)};
         cursor: pointer;
+        --mdc-icon-size: ${HueColorTempModeSelector.iconSize}px;
+        transition: background-color 200ms ease-out, color 200ms ease-out;
     }
-    .controls .wheel-wrapper:hover,
-    .controls .wheel-wrapper:active{
-        background-color: ${unsafeCSS(Consts.TileOffColor)};
+    .option:not(.selected):hover{
+        background: color-mix(in srgb, ${unsafeCSS(HueColorTempModeSelector.textColorCss)} 8%, transparent);
     }
-    .controls .wheel-wrapper.active{
-        border-color: white;
+    .option:focus-visible{
+        outline: 2px solid ${unsafeCSS(HueColorTempModeSelector.textColorCss)};
+        outline-offset: 2px;
     }
-    .controls .wheel-wrapper .wheel{
-        display:inline-block;
-        width: ${HueColorTempModeSelector.wheelHeight}px;
-        height: ${HueColorTempModeSelector.wheelHeight}px;
-        border-radius: ${HueColorTempModeSelector.wheelHeight / 2}px;
-        background-size: cover;
+    .option.selected{
+        background: ${unsafeCSS(HueColorTempModeSelector.textColorCss)};
+        /* the surface color contrasts with the text-colored pill */
+        color: var(--hue-detail-on-text-color, ${unsafeCSS(Consts.TintSurfaceCss)});
     }
-    .wheel.color{
-        background-image: url(${unsafeCSS(ControlResources.ModeColorIcon64)});
-    }
-    .wheel.temp{
-        background-image: url(${unsafeCSS(ControlResources.ModeTempIcon64)});
-    }
-    .wheel.brightness{
-        color: white;
+    @media (prefers-reduced-motion: reduce) {
+        .option{
+            transition: none;
+        }
     }
     `;
 
     protected override render() {
-        if (!this.showColor && !this.showTemp && this.mode != 'brightness')
+        if (!HueColorTempModeSelector.shouldRender(this.mode, this.showColor, this.showTemp))
             return nothing;
 
         return html`
-        <div class='controls'>
-        ${cache(
-        this.mode == 'brightness'
-            ? this.createBrightnessWheel()
-            : html`
-                ${this.createWheel('color')}
-                ${this.createWheel('temp')}
-            `
-    )}
+        <div class='track' role='group'>
+            ${this.createOption('color', 'mdi:palette', this.labels.color)}
+            ${this.createOption('temp', 'mdi:thermometer', this.labels.temp)}
         </div>`;
     }
 
-    private createBrightnessWheel() {
-        if (this.mode != 'brightness')
-            return nothing;
-
-        const icon = ViewUtils.hasHueIcons() ? 'hue:scene-bright' : 'mdi:brightness-7';
-
-        return html`
-        <div class='wheel-wrapper active' @click=${() => this.mode = 'brightness'}>
-            <span class='wheel brightness'>
-                <ha-icon icon="${icon}"></ha-icon>
-            </span>
-        </div>`;
-    }
-
-    private createWheel(mode: HueColorTempPickerMode) {
-        if (mode == 'temp' && !this.showTemp)
-            return nothing;
-        if (mode == 'color' && !this.showColor)
-            return nothing;
-
-        const wrapperClass = {
-            'wheel-wrapper': true,
-            'active': this.mode == mode
+    private createOption(mode: HueColorTempPickerMode, icon: string, label: string) {
+        const selected = this.mode == mode;
+        const optionClass = {
+            'option': true,
+            'selected': selected
         };
 
         return html`
-        <div class='${classMap(wrapperClass)}' @click=${() => this.mode = mode}>
-            <span class='wheel ${mode}'></span>
-        </div>`;
+        <button class='${classMap(optionClass)}' aria-pressed='${selected}' aria-label='${label}' title='${label}' @click=${() => this.mode = mode}>
+            <ha-icon icon='${icon}'></ha-icon>
+        </button>`;
     }
 
     private onColorPickerModeChange = () => {
@@ -199,7 +178,7 @@ export class HueColorTempModeSelector extends LitElement {
 
     private unregisterColorPickerEvent(picker?: HueColorTempPicker | null) {
         if (picker) {
-            picker.addEventListener('mode-change', this.onColorPickerModeChange);
+            picker.removeEventListener('mode-change', this.onColorPickerModeChange);
         }
     }
 
