@@ -6,6 +6,7 @@ import { HomeAssistant } from 'custom-card-helpers';
 import { AreaLightController } from '../src/core/area-light-controller';
 import { Color } from '../src/core/colors/color';
 import { hassMockup } from './mockup-hass-states';
+import { Consts } from '../src/types/consts';
 
 // only what LightMarkerManager reads
 function light(id: string, on: boolean, unavailable = false) {
@@ -44,11 +45,12 @@ describe('LightMarkerManager visibility', () => {
 });
 
 describe('LightMarkerManager off colors', () => {
-    it('draws an off light\'s pin in the theme outline tone, not black', () => {
+    it('draws an off light\'s pin hollow: surface fill, icon in the text color', () => {
         const manager = new LightMarkerManager(new HueColorTempPicker(), () => undefined);
         const off = light('light.off', false);
         manager.add(off);
-        expect(manager.getMarker(off).offColor).toBe('var(--md-sys-color-outline, var(--secondary-text-color))');
+        expect(manager.getMarker(off).offColor).toBe(Consts.TintSurfaceCss);
+        expect(manager.getMarker(off).offIconColor).toBe(`var(--hue-text-color, ${Consts.TintOnSurfaceCss})`);
     });
 
     it('draws an unavailable light\'s pin in the outline-variant tone', () => {
@@ -56,6 +58,7 @@ describe('LightMarkerManager off colors', () => {
         const gone = light('light.gone', false, true);
         manager.add(gone);
         expect(manager.getMarker(gone).offColor).toBe('var(--md-sys-color-outline-variant, var(--disabled-text-color))');
+        expect(manager.getMarker(gone).offIconColor).toBe(Consts.TintSurfaceCss);
     });
 });
 

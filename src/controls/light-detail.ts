@@ -606,8 +606,11 @@ export class HueLightDetail extends IdLitElement {
 
 export class LightMarkerManager {
     // theme tones instead of black and grey (doc/m3-wheel-spec.md: theme tokens, nothing hardcoded)
-    private static readonly MarkerOffColor = 'var(--md-sys-color-outline, var(--secondary-text-color))';
+    // off: a hollow pin (surface fill, text-colored icon and ring); unavailable: a dim filled pin
+    private static readonly MarkerOffColor = Consts.TintSurfaceCss;
+    private static readonly MarkerOffIconColor = `var(--hue-text-color, ${Consts.TintOnSurfaceCss})`;
     private static readonly MarkerUnavailableColor = 'var(--md-sys-color-outline-variant, var(--disabled-text-color))';
+    private static readonly MarkerUnavailableIconColor = Consts.TintSurfaceCss;
 
     private _markerToLight: Record<string, ISingleLightContainer>;
     private _lightToMarker: Record<string, HueColorTempPickerMarker>;
@@ -698,6 +701,7 @@ export class LightMarkerManager {
         // show marker as off
         marker.isOff = !light.isOn(); // unavailable state will be also off
         marker.offColor = light.isUnavailable() ? LightMarkerManager.MarkerUnavailableColor : LightMarkerManager.MarkerOffColor;
+        marker.offIconColor = light.isUnavailable() ? LightMarkerManager.MarkerUnavailableIconColor : LightMarkerManager.MarkerOffIconColor;
         this.applyVisibility(light, marker);
 
         // unmerge/remerge
