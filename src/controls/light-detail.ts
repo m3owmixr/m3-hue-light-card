@@ -265,11 +265,19 @@ export class HueLightDetail extends IdLitElement {
             }
 
             // keep the selected tile in view
-            const tile = this.renderRoot.querySelector<HTMLElement>('.tiles [selected]');
+            const tile = HueLightDetail.findSelectedTile(this.renderRoot);
             if (tile && typeof tile.scrollIntoView == 'function') {
                 tile.scrollIntoView({ block: 'nearest', inline: 'nearest' });
             }
         }
+    }
+
+    /**
+     * @returns The selected light tile. Reads the property: tiles reflect `selected` to the attribute only in their own later update.
+     */
+    public static findSelectedTile(root: ParentNode): HueLightDetailTile | null {
+        const tiles = Array.from(root.querySelectorAll<HueLightDetailTile>(HueLightDetailTile.ElementName));
+        return tiles.find(t => t.selected) ?? null;
     }
 
     private static readonly textColorCss = `var(--hue-text-color, ${Consts.TintOnSurfaceCss})`;
@@ -306,6 +314,9 @@ export class HueLightDetail extends IdLitElement {
     .back-button {
         flex: none;
         --mdc-icon-button-size: 40px;
+        /* ha-icon-button ignores color in this dialog and takes the theme accent unless these are set too */
+        --icon-primary-color: var(--hue-screen-back-button-color, ${unsafeCSS(HueLightDetail.textColorCss)});
+        --wa-color-on-normal: var(--hue-screen-back-button-color, ${unsafeCSS(HueLightDetail.textColorCss)});
         color: var(--hue-screen-back-button-color, ${unsafeCSS(HueLightDetail.textColorCss)});
     }
     .title {
@@ -353,6 +364,10 @@ export class HueLightDetail extends IdLitElement {
         gap: 12px;
         height: ${LightDetailLayout.controlRowHeight}px;
         padding: 0 ${LightDetailLayout.sidePadding}px;
+    }
+    /* on/off-only lights: the row keeps its space, so the wheel area doesn't move */
+    .controls.invisible {
+        visibility: hidden;
     }
     .controls .brightness-slider {
         flex: 1;
@@ -436,7 +451,7 @@ export class HueLightDetail extends IdLitElement {
                 <ha-icon class='brightness-icon' icon='${container.getIcon() ?? IconHelper.getIcon(1)}'></ha-icon>` : nothing}
             </div>
         </div>
-        <div class='controls ${kind == 'switch' ? 'hidden' : ''}'>
+        <div class='controls ${kind == 'switch' ? 'invisible' : ''}'>
             <${unsafeStatic(HueColorTempModeSelector.ElementName)} class='mode-selector'
                 .labels=${{
         color: hass ? localize(hass, 'dialog.detail.color') : 'Color',
@@ -590,7 +605,7 @@ export class HueLightDetail extends IdLitElement {
     }
 }
 
-class LightMarkerManager {
+export class LightMarkerManager {
     private static readonly MarkerOffColor = new Color(0, 0, 0);
     private static readonly MarkerUnavailableColor = new Color(102, 102, 102);
 
@@ -708,7 +723,8 @@ class LightMarkerManager {
     }
 
     private applyVisibility(light: ISingleLightContainer, marker: HueColorTempPickerMarker) {
-        const selected = marker.isActive || LightDetailLayout.isSelected(light.getEntityId(), this._selectedIds);
+        // only the screen's selection counts: markers are also activated while being added, and an off one must stay hidden then
+        const selected = LightDetailLayout.isSelected(light.getEntityId(), this._selectedIds);
         marker.hidden = !LightDetailLayout.markerVisible(light.isOn(), selected);
     }
 

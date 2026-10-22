@@ -43,3 +43,9 @@ describe('HueColorTempModeSelector toggle', () => {
         expect(el.mode).toBe('temp');
     });
 });
+
+describe('HueColorTempModeSelector styles', () => {
+    it('draws the selected icon in the dialog\'s real surface color (hueScreenBgColor, offColor)', () => {
+        expect(HueColorTempModeSelector.styles.cssText).toContain('--hue-switch-handle-color');
+    });
+});

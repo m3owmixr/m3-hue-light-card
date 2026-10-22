@@ -11,6 +11,14 @@ import { noop } from '../types/functions';
 import { IconHelper } from '../core/icon-helper';
 import { HueLikeLightCardEntityConfig } from '../types/config';
 
+export interface ITileColors {
+    background: string | null;
+    outline: string | null;
+    foreground: string | null;
+    switchTrack: string | null;
+    switchHandle: string | null;
+}
+
 export interface ILightDetailTileSelectDetail {
     lightContainer: ISingleLightContainer;
 }
@@ -39,6 +47,22 @@ export class HueLightDetailTile extends HueDialogTile {
 
     private static readonly tileWidth = 88; // px
     private static readonly tileHeight = 104; // px
+    private static readonly paddingTop = 8; // px
+    private static readonly paddingBottom = 6; // px
+    private static readonly iconSize = 24; // px
+    private static readonly gap = 2; // px
+    private static readonly nameLineHeight = 16; // px
+    /** The M3 switch's host is 48px (touch target); a negative margin leaves its 32px track in the layout. */
+    private static readonly switchHeight = 32; // px
+    private static readonly switchMargin = -8; // px
+
+    /**
+     * @returns Height of a tile's content for a name of this many lines.
+     */
+    public static contentHeight(nameLines: number): number {
+        const t = HueLightDetailTile;
+        return t.paddingTop + t.iconSize + t.gap + nameLines * t.nameLineHeight + t.switchHeight + t.paddingBottom;
+    }
     private static readonly litTintAlpha = 0.26; // same as the light rows
     private static readonly outlineLighten = 0.45;
 
@@ -47,29 +71,40 @@ export class HueLightDetailTile extends HueDialogTile {
     /**
      * @returns Colors of a tile; null means the CSS default (see-through on-surface, text color).
      */
-    public static tileColors(light: Color | null, isOn: boolean, isUnavailable: boolean, selected: boolean): { background: string | null, outline: string | null, foreground: string | null } {
+    public static tileColors(light: Color | null, isOn: boolean, isUnavailable: boolean, selected: boolean): ITileColors {
         const lit = isOn && !isUnavailable && !!light;
         if (!lit) {
             return {
                 background: null,
                 outline: selected ? HueLightDetailTile.textColorCss : null,
-                foreground: null
+                foreground: null,
+                switchTrack: null,
+                switchHandle: null
             };
         }
 
         const opaque = new Color(light!.getRed(), light!.getGreen(), light!.getBlue());
         if (!selected) {
+            // the switch matches the light rows
+            const switchColors = HueDialogLightTile.switchColors(opaque);
             return {
                 background: new Color(opaque.getRed(), opaque.getGreen(), opaque.getBlue(), HueLightDetailTile.litTintAlpha).toString(),
                 outline: null,
-                foreground: null
+                foreground: null,
+                switchTrack: switchColors.track,
+                switchHandle: switchColors.handle
             };
         }
 
+        // filled with the light color: the switch is drawn in the foreground instead, so it shows on the fill
+        const background = opaque.toString();
+        const foreground = opaque.getForeground(Consts.LightColor, Consts.DarkColor, 0).toString();
         return {
-            background: opaque.toString(),
+            background,
             outline: opaque.mix(Consts.LightColor, HueLightDetailTile.outlineLighten).toString(),
-            foreground: opaque.getForeground(Consts.LightColor, Consts.DarkColor, 0).toString()
+            foreground,
+            switchTrack: foreground,
+            switchHandle: background
         };
     }
 
@@ -88,7 +123,7 @@ export class HueLightDetailTile extends HueDialogTile {
         justify-content: space-between;
         width: ${HueLightDetailTile.tileWidth}px;
         height: ${HueLightDetailTile.tileHeight}px;
-        padding: 10px 4px 8px;
+        padding: ${HueLightDetailTile.paddingTop}px 4px ${HueLightDetailTile.paddingBottom}px;
         border-radius: 16px;
         background: var(--hue-detail-tile-background, color-mix(in srgb, ${unsafeCSS(Consts.TintOnSurfaceCss)} 8%, transparent));
         box-shadow: var(--hue-detail-tile-shadow, none);
@@ -103,7 +138,7 @@ export class HueLightDetailTile extends HueDialogTile {
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: 4px;
+        gap: ${HueLightDetailTile.gap}px;
         width: 100%;
         cursor: pointer;
         border-radius: 12px;
@@ -114,12 +149,12 @@ export class HueLightDetailTile extends HueDialogTile {
         outline-offset: 2px;
     }
     .tap-area ha-icon {
-        --mdc-icon-size: 24px;
+        --mdc-icon-size: ${HueLightDetailTile.iconSize}px;
     }
     .name {
         width: 100%;
         font-size: 13px;
-        line-height: 16px;
+        line-height: ${HueLightDetailTile.nameLineHeight}px;
         text-align: center;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -128,6 +163,7 @@ export class HueLightDetailTile extends HueDialogTile {
         -webkit-box-orient: vertical;
     }
     .m3-switch {
+        margin: ${HueLightDetailTile.switchMargin}px 0;
         /* lit tile: the switch takes the light's color, like the light rows */
         --m3-switch-selected-track: var(--hue-row-switch-track, var(--md-sys-color-primary, var(--primary-color)));
         --m3-switch-selected-handle: var(--hue-row-switch-handle, var(--md-sys-color-on-primary, #fff));
@@ -152,9 +188,8 @@ export class HueLightDetailTile extends HueDialogTile {
         this.setOrRemove('--hue-detail-tile-shadow', colors.outline ? `inset 0 0 0 2px ${colors.outline}` : null);
         this.setOrRemove('--hue-detail-tile-foreground', colors.foreground);
 
-        const switchColors = color && light?.isOn() ? HueDialogLightTile.switchColors(color) : null;
-        this.setOrRemove('--hue-row-switch-track', switchColors?.track ?? null);
-        this.setOrRemove('--hue-row-switch-handle', switchColors?.handle ?? null);
+        this.setOrRemove('--hue-row-switch-track', colors.switchTrack);
+        this.setOrRemove('--hue-row-switch-handle', colors.switchHandle);
     }
 
     private setOrRemove(name: string, value: string | null) {

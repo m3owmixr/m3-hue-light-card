@@ -130,8 +130,8 @@ export class HueColorTempModeSelector extends LitElement {
     }
     .option.selected{
         background: ${unsafeCSS(HueColorTempModeSelector.textColorCss)};
-        /* the surface color contrasts with the text-colored pill */
-        color: var(--hue-detail-on-text-color, ${unsafeCSS(Consts.TintSurfaceCss)});
+        /* the dialog's actual surface (set by the dialog, honors hueScreenBgColor and offColor) contrasts with the text-colored pill */
+        color: var(--hue-switch-handle-color, ${unsafeCSS(Consts.TintSurfaceCss)});
     }
     @media (prefers-reduced-motion: reduce) {
         .option{
