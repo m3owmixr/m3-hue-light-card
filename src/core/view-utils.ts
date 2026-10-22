@@ -51,11 +51,12 @@ export class ViewUtils {
     /**
      * Creates slider for given ILightContainer and config.
      * @param onChange Be careful - this function is called on different scope, better pack your function to arrow call.
+     * @param alwaysShow Shows the (flat) slider even with `slider: none` (the color wheel screen keeps its slider).
      */
-    public static createSlider(ctrl: ILightContainer, config: HueLikeLightCardConfig, onChange: Action) {
+    public static createSlider(ctrl: ILightContainer, config: HueLikeLightCardConfig, onChange: Action, alwaysShow = false) {
 
         // If the controller doesn't support brightness change or slider is disabled, the slider will not be created
-        if (!ctrl.features.brightness || config.slider == SliderType.None)
+        if (!ctrl.features.brightness || (config.slider == SliderType.None && !alwaysShow))
             return nothing;
 
         const min = config.allowZero ? 0 : 1;

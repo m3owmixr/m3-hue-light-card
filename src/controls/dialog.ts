@@ -637,6 +637,9 @@ export class HueDialog extends IdLitElement {
                     detailElement.style.zIndex = '2'; // over header
 
                     detailElement.areaController = this._ctrl;
+                    detailElement.config = this._config;
+                    detailElement.entitiesConfig = this._entitiesConfig;
+                    detailElement.actionHandler = this._actionHandler;
 
                     // action for show and hide
                     detailElement.addEventListener('show', () => {
