@@ -31,9 +31,8 @@ export class HueColorTempPickerMarker {
     private static readonly markerActivePath = 'M 24,0 C 10.745166,0 0,10.575951 0,23.622046 0,39.566928 21,57.578739 22.05,58.346457 L 24,60 25.95,58.346457 C 27,57.578739 48,39.566928 48,23.622046 48,10.575951 37.254834,0 24,0 Z';
     private static readonly markerActivePathSize = { width: 48, height: 60 };
     /** SVG path of marker in it's small non-active form. (12x12 px) */
-    private static readonly markerNonActivePath = 'M6 0A6 6 0 006 12 6 6 0 006 0Z';
-    private static readonly markerNonActivePathSize = { width: 12, height: 12 };
-    private static readonly markerNonActiveOutlinePath = 'M8 0A8 8 0 008 16 8 8 0 008 0Z';
+    private static readonly markerNonActivePath = 'M14 0A14 14 0 0014 28 14 14 0 0014 0Z';
+    private static readonly markerNonActivePathSize = { width: 28, height: 28 };
 
     public constructor(parent: HueColorTempPicker, name?: string) {
         this.name = name ?? ('m' + HueColorTempPickerMarker.counter++);
@@ -204,6 +203,17 @@ export class HueColorTempPickerMarker {
         }
     }
 
+    private _hidden = false;
+
+    /** Gets or sets whether this marker is hidden (off lights show only while selected). */
+    public get hidden() {
+        return this._hidden;
+    }
+    public set hidden(value: boolean) {
+        this._hidden = value;
+        this._markerG.classList.toggle('hidden', value);
+    }
+
     /** Gets or sets whether light with this marker is currently off. */
     public get isOff() {
         return this._isOff;
@@ -315,18 +325,28 @@ export class HueColorTempPickerMarker {
     // #region Rendering
 
     public static styles = css`
-        .marker-outline {
-            fill: white;
-            filter: url(#dot-shadow);
-            transform: translate(-2px, -2px);
-        }
+        /* refined pin (doc/m3-wheel-spec.md): a ring in the screen's text color, light M3 shadow */
         .marker {
             fill: currentColor;
+            stroke: var(--hue-text-color, ${unsafeCSS(Consts.TintOnSurfaceCss)});
+            stroke-width: 6px;
+            paint-order: stroke;
+            filter: url(#dot-shadow);
         }
         .icon {
             transform: scale(1.2) translate(8px, 8px);
             transition: ${unsafeCSS(Consts.TransitionDefault)};
             fill: white;
+        }
+        /* other lights: their icon, centered in the 28px circle */
+        .gm:not(.active):not(.preview) .icon {
+            transform: translate(6px, 6px) scale(0.667);
+        }
+        .gm:not(.active):not(.preview) .icon.text {
+            transform: translate(-10px, -10px);
+            font-size: 14px;
+        }
+        .gm.hidden {
             display: none;
         }
         .icon.text {
@@ -339,28 +359,10 @@ export class HueColorTempPickerMarker {
         .gm.off-mode {
             opacity: 0.7;
         }
-        .gm.off-mode .marker-outline {
-            display: none;
-        }
-        .gm.off-mode .marker {
-            filter: url(#dot-shadow);
-        }
 
         .gm.active,
         .gm.preview {
             transition: scale 0.1s ease-in-out;
-        }
-        .gm.active  .marker-outline,
-        .gm.preview .marker-outline {
-            display: none;
-        }
-        .gm.active  .marker,
-        .gm.preview .marker {
-            filter: url(#active-shadow);
-        }
-        .gm.active  .icon,
-        .gm.preview .icon {
-            display: inline;
         }
 
         .gm.active.drag {
@@ -378,7 +380,7 @@ export class HueColorTempPickerMarker {
             animation: big-boing 150ms ease-in-out;
         }
 
-        .marker-outline, .marker, .icon{
+        .marker, .icon{
             cursor: pointer;
         }
 
@@ -570,14 +572,6 @@ export class HueColorTempPickerMarker {
         );
         g.setAttribute('class', 'gm');
 
-        const o = document.createElementNS(
-            'http://www.w3.org/2000/svg',
-            'path'
-        );
-
-        o.setAttribute('class', 'marker-outline');
-        o.setAttribute('d', HueColorTempPickerMarker.markerNonActiveOutlinePath);
-
         const m = document.createElementNS(
             'http://www.w3.org/2000/svg',
             'path'
@@ -588,7 +582,6 @@ export class HueColorTempPickerMarker {
 
         const i = this.drawMarkerIcon();
 
-        g.appendChild(o);
         g.appendChild(m);
         g.appendChild(i);
 

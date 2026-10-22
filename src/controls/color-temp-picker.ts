@@ -290,8 +290,8 @@ export class HueColorTempPicker extends LitElement {
      * @returns whether the passed marker can be merged into the passed target.
      */
     private canBeMarkerMerged(marker: HueColorTempPickerMarker, target: HueColorTempPickerMarker) {
-        // turned-off marker not merging with anything
-        if (marker.isOff)
+        // turned-off or hidden marker not merging with anything
+        if (marker.isOff || marker.hidden)
             return false;
 
         const range = this.getRadius() * 0.1;
@@ -304,8 +304,8 @@ export class HueColorTempPicker extends LitElement {
         if (target.mode != marker.mode)
             return false;
 
-        // ignore all turned-off markers
-        if (target.isOff)
+        // ignore all turned-off and hidden markers
+        if (target.isOff || target.hidden)
             return false;
 
         const distance = target.position.getDistance(marker.position);
@@ -840,28 +840,12 @@ export class HueColorTempPicker extends LitElement {
         <div id="canvas">
             <svg id="interactionLayer">
                 <defs>
+                    <!-- M3 elevation 1 (doc/m3-wheel-spec.md); both ids kept for the marker styles -->
                     <filter id="dot-shadow">
-                        <feDropShadow dx="0" dy="0.5" stdDeviation="1" flood-opacity="1"></feDropShadow>
+                        <feDropShadow dx="0" dy="1" stdDeviation="1.5" flood-opacity="0.3"></feDropShadow>
                     </filter>
                     <filter id="active-shadow">
-                        <!-- Shadow offset -->
-                        <feOffset dx="0" dy="-10" />
-
-                        <!-- Shadow blur -->
-                        <feGaussianBlur stdDeviation="7" result="offset-blur"/>
-
-                        <!-- Invert drop shadow to make an inset shadow -->
-                        <feComposite operator="out" in="SourceGraphic" in2="offset-blur" result="inverse"/>
-                        
-                        <!-- Cut color inside shadow -->
-                        <feFlood flood-color="#0005" flood-opacity=".95" result="color"/>
-                        <feComposite operator="in" in="color" in2="inverse" result="shadow"/>
-
-                        <!-- Placing shadow over element -->
-                        <feComposite operator="over" in="shadow" in2="SourceGraphic"/>
-
-                        <!-- Classic drop shadow -->
-                        <feDropShadow dx="0" dy="1.0" stdDeviation="2.0" flood-opacity="1"></feDropShadow>
+                        <feDropShadow dx="0" dy="1" stdDeviation="1.5" flood-opacity="0.3"></feDropShadow>
                     </filter>
                 </defs>
                 ${this._markers.map(m => m.render())}

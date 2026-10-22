@@ -57,3 +57,29 @@ describe('HueTempPicker', () => {
         }
     });
 });
+describe('HueColorTempPickerMarker.hidden', () => {
+    beforeAll(() => {
+        // jsdom has no SVG geometry; markers fall back to their fixed sizes
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (SVGElement.prototype as any).getBBox = () => ({ x: 0, y: 0, width: 0, height: 0 });
+    });
+
+    it('is visible by default and hides when set', () => {
+        const picker = new HueColorTempPicker();
+        const marker = picker.addMarker('light.a', false);
+        expect(marker.hidden).toBe(false);
+
+        marker.hidden = true;
+        expect(marker.render().classList.contains('hidden')).toBe(true);
+    });
+
+    it('never offers a hidden marker as a merge target', () => {
+        const picker = new HueColorTempPicker();
+        const a = picker.addMarker('light.a', false);
+        const b = picker.addMarker('light.b', false);
+        expect(picker.searchMergeMarkerTarget(a)).toBe(b);
+
+        b.hidden = true;
+        expect(picker.searchMergeMarkerTarget(a)).toBeUndefined();
+    });
+});

@@ -16,6 +16,7 @@ import { AreaLightController } from '../core/area-light-controller';
 import { ILightContainer, ISingleLightContainer } from '../types/types-interface';
 import { Action, Action1 } from '../types/functions';
 import { Color } from '../core/colors/color';
+import { LightDetailLayout } from '../core/light-detail-layout';
 
 @customElement(HueLightDetail.ElementName)
 export class HueLightDetail extends IdLitElement {
@@ -503,6 +504,7 @@ class LightMarkerManager {
     private _picker: HueColorTempPicker;
     private _onMarkerActivation: Action1<ISingleLightContainer[]>;
     private _stateUpdateSuspended = false;
+    private _selectedIds: string[] = [];
 
     public constructor(picker: HueColorTempPicker, onMarkerActivation: Action1<ISingleLightContainer[]>) {
         this._picker = picker;
@@ -586,6 +588,7 @@ class LightMarkerManager {
         // show marker as off
         marker.isOff = !light.isOn(); // unavailable state will be also off
         marker.offColor = light.isUnavailable() ? LightMarkerManager.MarkerUnavailableColor : LightMarkerManager.MarkerOffColor;
+        this.applyVisibility(light, marker);
 
         // unmerge/remerge
         if (mergingPossible && !marker.isActive && changed) { // do not merge single active marker and merge only changed values
@@ -594,6 +597,24 @@ class LightMarkerManager {
             }
             this._picker.tryMergeMarkers(marker);
         }
+    }
+
+    /**
+     * Sets the lights selected on the screen; off lights only show their marker while selected.
+     */
+    public setSelected(entityIds: string[]) {
+        this._selectedIds = entityIds;
+        Object.values(this._markerToLight).forEach(light => {
+            const marker = this.getMarker(light);
+            if (marker) {
+                this.applyVisibility(light, marker);
+            }
+        });
+    }
+
+    private applyVisibility(light: ISingleLightContainer, marker: HueColorTempPickerMarker) {
+        const selected = marker.isActive || LightDetailLayout.isSelected(light.getEntityId(), this._selectedIds);
+        marker.hidden = !LightDetailLayout.markerVisible(light.isOn(), selected);
     }
 
     public getLight(marker: HueColorTempPickerMarker) {
