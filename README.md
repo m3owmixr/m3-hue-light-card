@@ -4,13 +4,12 @@
 
 A Home Assistant light card that takes on the color of your lights, styled for Material 3 and Material You. It's a fork of [Hue-Like Light Card](https://github.com/Gh61/lovelace-hue-like-light-card) by Gh61.
 
-<p>
-  <img alt="Card in light mode" src="https://github.com/m3owmixr/m3-hue-light-card/raw/main/doc/m3-card-light.png" width="400" />
-  <img alt="Card in dark mode" src="https://github.com/m3owmixr/m3-hue-light-card/raw/main/doc/m3-card-dark.png" width="400" />
+<p align="center">
+  <img alt="A card tinted by several lights, with the wavy slider moving" src="https://github.com/m3owmixr/m3-hue-light-card/raw/main/doc/m3-light-card-header.gif" width="600" />
 </p>
 <p>
-  <img alt="Several lights in light mode" src="https://github.com/m3owmixr/m3-hue-light-card/raw/main/doc/m3-multi-light.png" width="400" />
-  <img alt="Several lights in dark mode" src="https://github.com/m3owmixr/m3-hue-light-card/raw/main/doc/m3-multi-dark.png" width="400" />
+  <img alt="Cards in light mode" src="https://github.com/m3owmixr/m3-hue-light-card/raw/main/doc/m3-cards-light.png" width="400" />
+  <img alt="Cards in dark mode" src="https://github.com/m3owmixr/m3-hue-light-card/raw/main/doc/m3-cards-dark.png" width="400" />
 </p>
 
 ## Features
@@ -20,6 +19,15 @@ A Home Assistant light card that takes on the color of your lights, styled for M
 - **M3 scene screen.** Tap the card to pick scenes and adjust each light, including [Scene Presets](https://github.com/Hypfer/hass-scene_presets) support. It's tinted with a soft glow of your lights' colors, shows scenes in two scrolling rows with page dots, and lists each light with its own switch.
 - **One card, many lights.** Control a single light, a list, or a whole area, floor or label.
 - **Works with your theme.** Uses [Material You](https://github.com/Nerwyn/material-you-utilities) colors when available, and standard Home Assistant theme colors otherwise. Light and dark mode are both supported.
+
+## Before and after
+
+| Original Hue-Like Light Card | M3 Hue Light Card |
+|---|---|
+| <img alt="Original cards in light mode" src="https://github.com/m3owmixr/m3-hue-light-card/raw/main/doc/original-cards-light.png" width="380" /> | <img alt="M3 cards in light mode" src="https://github.com/m3owmixr/m3-hue-light-card/raw/main/doc/m3-cards-light.png" width="380" /> |
+| <img alt="Original cards in dark mode" src="https://github.com/m3owmixr/m3-hue-light-card/raw/main/doc/original-cards-dark.png" width="380" /> | <img alt="M3 cards in dark mode" src="https://github.com/m3owmixr/m3-hue-light-card/raw/main/doc/m3-cards-dark.png" width="380" /> |
+| <img alt="Original scene screen for several lights" src="https://github.com/m3owmixr/m3-hue-light-card/raw/main/doc/original-scenes-dark-multi.png" width="380" /> | <img alt="M3 scene screen for several lights" src="https://github.com/m3owmixr/m3-hue-light-card/raw/main/doc/m3-scenes-dark-multi.png" width="380" /> |
+| <img alt="Original scene screen for one light" src="https://github.com/m3owmixr/m3-hue-light-card/raw/main/doc/original-scenes-dark-single.png" width="380" /> | <img alt="M3 scene screen for one light" src="https://github.com/m3owmixr/m3-hue-light-card/raw/main/doc/m3-scenes-dark-single.png" width="380" /> |
 
 ## Installation
 
@@ -114,6 +122,10 @@ tint: full
 `slider: wavy` draws the active part of the brightness slider as a gently moving wave, in the M3 Expressive style. The wave stands still when your system's reduced-motion setting is on.
 
 <p>
+  <img alt="slider: wavy in light mode, moving" src="https://github.com/m3owmixr/m3-hue-light-card/raw/main/doc/m3-slider-wavy-light.gif" width="400" />
+  <img alt="slider: wavy in dark mode" src="https://github.com/m3owmixr/m3-hue-light-card/raw/main/doc/m3-slider-wavy-dark.png" width="400" />
+</p>
+<p>
   <img alt="slider: wavy, with tint: harmonized (top) and tint: full (bottom)" src="https://github.com/m3owmixr/m3-hue-light-card/raw/main/doc/m3-slider-wavy.png" width="400" />
 </p>
 
@@ -123,9 +135,32 @@ entity: light.floor_lamp
 slider: wavy
 ```
 
+## No slider
+
+`slider: none` hides the brightness slider, for a compact card with just the switch. The scene screen hides its slider too.
+
+<p>
+  <img alt="slider: none in light mode" src="https://github.com/m3owmixr/m3-hue-light-card/raw/main/doc/m3-multi-light.png" width="400" />
+  <img alt="slider: none in dark mode" src="https://github.com/m3owmixr/m3-hue-light-card/raw/main/doc/m3-multi-dark.png" width="400" />
+</p>
+
+```yaml
+type: custom:m3-hue-light-card
+title: TV scenes
+area: Living room
+slider: none
+```
+
 ## Scenes
 
-Tap the card to open the scene screen, where you can pick a scene or change each light's color and brightness. The card finds scenes from the areas its lights are in, or you can list your own:
+Tap the card to open the scene screen, where you can pick a scene or change each light's color and brightness.
+
+<p>
+  <img alt="Scene screen for several lights: scrolling scenes and a switch for each light" src="https://github.com/m3owmixr/m3-hue-light-card/raw/main/doc/m3-scenes-light-multi.gif" width="400" />
+  <img alt="Scene screen for one light, opening from the card" src="https://github.com/m3owmixr/m3-hue-light-card/raw/main/doc/m3-scenes-light-single.gif" width="400" />
+</p>
+
+The card finds scenes from the areas its lights are in, or you can list your own:
 
 ```yaml
 type: custom:m3-hue-light-card

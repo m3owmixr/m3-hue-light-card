@@ -193,8 +193,11 @@ Tapping the card opens the **scene screen**. It shows scenes for the card's ligh
 > The scene screen follows the card's `tint` and `slider` options. On a card with a single light, the Lights section is hidden; tap the title to open the color wheel.
 
 <p>
-  <img alt="Scene screen" src="https://github.com/m3owmixr/m3-hue-light-card/raw/main/doc/hue-screen2.png" height="480" />
+  <img alt="Scene screen for several lights" src="https://github.com/m3owmixr/m3-hue-light-card/raw/main/doc/m3-scenes-light-multi.png" height="480" />
   <img alt="Light detail" src="https://github.com/m3owmixr/m3-hue-light-card/raw/main/doc/hue-screen-detail-1.png" height="480" />
+</p>
+<p>
+  <img alt="Scene screen for one light, without the Lights section" src="https://github.com/m3owmixr/m3-hue-light-card/raw/main/doc/m3-scenes-light-single.png" width="480" />
 </p>
 
 ### Choosing scenes
