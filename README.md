@@ -17,6 +17,7 @@ A Home Assistant light card that takes on the color of your lights, styled for M
 - **Tinted by your lights.** The card takes on the color of its lights, blended with your theme. Several lights of different colors make a gradient.
 - **Material 3 controls.** An M3 brightness slider (flat, or wavy with `slider: wavy`) and switch, drawn in the card's text color so they never clash with the light color.
 - **M3 scene screen.** Tap the card to pick scenes and adjust each light, including [Scene Presets](https://github.com/Hypfer/hass-scene_presets) support. It's tinted with a soft glow of your lights' colors, shows scenes in two scrolling rows with page dots, and lists each light with its own switch.
+- **M3 color wheel screen.** Pick a light from the tiles under the wheel, switch between color and white temperature, and set brightness with the same slider as the card.
 - **One card, many lights.** Control a single light, a list, or a whole area, floor or label.
 - **Works with your theme.** Uses [Material You](https://github.com/Nerwyn/material-you-utilities) colors when available, and standard Home Assistant theme colors otherwise. Light and dark mode are both supported.
 
@@ -140,7 +141,7 @@ slider: wavy
 
 ## No slider
 
-`slider: none` hides the brightness slider, for a compact card with just the switch. The scene screen hides its slider too.
+`slider: none` hides the brightness slider, for a compact card with just the switch. The scene screen hides its slider too; the color wheel screen keeps one so you can still fine-tune each light.
 
 <p>
   <img alt="slider: none in light mode" src="https://github.com/m3owmixr/m3-hue-light-card/raw/main/doc/m3-multi-light.png" width="400" />
@@ -234,14 +235,10 @@ tap_action:
 - **Hue icons:** install [hass-hue-icons](https://github.com/arallsopp/hass-hue-icons) to use Philips Hue icons such as `icon: hue:bulb-classic`. The card also uses them automatically where it picks icons itself.
 - **Coming from the original card:** change `type: custom:hue-like-light-card` to `type: custom:m3-hue-light-card`. Your other options keep working, and both cards can be installed at the same time. You can remove `slider: mushroom`; Mushroom is no longer needed.
 
-## Coming next
-
-- **M3 color wheel screen** (the light detail view) to match the scene screen
-
 ## Credits and license
 
 This is a fork of [Hue-Like Light Card](https://github.com/Gh61/lovelace-hue-like-light-card) by **Gh61 (Tom Zenkner)**, which provides the light control, the scene screen and the multi-light support. The slider design was inspired by [M3 Cards](https://github.com/j0sp0r/m3-cards) by j0sp0r (MIT).
 
-**What's different from the original:** M3 slider and switch, M3 shapes and type, `tint: harmonized`, Material You colors, an M3 scene screen, and no Mushroom dependency. The color wheel screen is unchanged so far. Card and API names use `m3` (`custom:m3-hue-light-card`, `#m3_hue_card:`), so this card can be installed next to the original.
+**What's different from the original:** M3 slider and switch, M3 shapes and type, `tint: harmonized`, Material You colors, an M3 scene screen and color wheel screen, and no Mushroom dependency. Card and API names use `m3` (`custom:m3-hue-light-card`, `#m3_hue_card:`), so this card can be installed next to the original.
 
 Licensed under LGPL-2.1, like the original. See [LICENSE](https://github.com/m3owmixr/m3-hue-light-card/blob/main/LICENSE) and [NOTICE](https://github.com/m3owmixr/m3-hue-light-card/blob/main/NOTICE).

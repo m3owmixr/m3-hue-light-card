@@ -27,6 +27,7 @@ import { HueDialogSceneHATile } from './dialog-scene-ha-tile';
 import { horizontalScroll } from '../directives/horizontal-scroll';
 import { M3PageDots } from './m3-page-dots';
 import { PageDotsMath } from '../core/page-dots-math';
+import { LightDetailLayout } from '../core/light-detail-layout';
 
 @customElement(HueDialog.ElementName)
 export class HueDialog extends IdLitElement {
@@ -165,6 +166,30 @@ export class HueDialog extends IdLitElement {
             }
         }
     }
+
+    /**
+     * Grows the dialog while the color wheel screen is open, when it's too short for the wheel's usual size (spec: grow when needed).
+     * @param detail The open detail screen, or null to shrink back.
+     */
+    private fitContentToDetail(detail: HueLightDetail | null) {
+        const content = this.renderRoot.querySelector<HTMLElement>('.content');
+        if (!content)
+            return;
+
+        content.style.minHeight = '';
+
+        // full-screen dialogs already have the room
+        if (!detail || window.matchMedia(HueDialog.fullScreenMedia).matches)
+            return;
+
+        // the detail screen covers the whole dialog surface
+        const minHeight = LightDetailLayout.contentMinHeight(detail.requiredHeight(), detail.clientHeight, content.clientHeight, window.innerHeight);
+        if (minHeight != null) {
+            content.style.minHeight = minHeight + 'px';
+        }
+    }
+
+    private static readonly fullScreenMedia = '(max-width: 450px), (max-height: 500px)';
 
     private afterSceneTileActivated(ev: CustomEvent<ITileEventDetail>) {
         // scroll to selected scene
@@ -525,6 +550,13 @@ export class HueDialog extends IdLitElement {
     .content {
         outline: none;
         padding-top: var(--ha-space-6);
+        /* grows smoothly while the color wheel screen is open */
+        transition: min-height 250ms cubic-bezier(0.2, 0, 0, 1);
+    }
+    @media (prefers-reduced-motion: reduce) {
+        .content {
+            transition: none;
+        }
     }
 
     /* tiles - scenes, lights */
@@ -644,9 +676,11 @@ export class HueDialog extends IdLitElement {
                     // action for show and hide
                     detailElement.addEventListener('show', () => {
                         this.toggleUnderDetailControls(true);
+                        this.fitContentToDetail(detailElement);
                     });
                     detailElement.addEventListener('hide', () => {
                         this.toggleUnderDetailControls(false);
+                        this.fitContentToDetail(null);
                         this.hideLightDetail();
                     });
                     // when lightContainer changes from picker
