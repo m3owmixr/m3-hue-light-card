@@ -72,7 +72,10 @@ export class HueApiProvider {
             return;
 
         const methodName = hash.substring(Consts.ApiProviderName.length + 2);
-        const method = HueApiProvider._wrapper[methodName];
+        // only own members, so the hash can't reach Object.prototype methods
+        const method = Object.prototype.hasOwnProperty.call(HueApiProvider._wrapper, methodName)
+            ? HueApiProvider._wrapper[methodName]
+            : undefined;
         if (typeof method === 'function') {
             logMessage('Hash - Calling API function ' + methodName);
 
