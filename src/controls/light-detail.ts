@@ -13,7 +13,6 @@ import { IconHelper } from '../core/icon-helper';
 import { AreaLightController } from '../core/area-light-controller';
 import { ILightContainer, ISingleLightContainer } from '../types/types-interface';
 import { Action, Action1, noop } from '../types/functions';
-import { Color } from '../core/colors/color';
 import { LightDetailLayout } from '../core/light-detail-layout';
 import { ViewUtils } from '../core/view-utils';
 import { HueLikeLightCardConfig, HueLikeLightCardEntityConfigCollection } from '../types/config';
@@ -606,8 +605,9 @@ export class HueLightDetail extends IdLitElement {
 }
 
 export class LightMarkerManager {
-    private static readonly MarkerOffColor = new Color(0, 0, 0);
-    private static readonly MarkerUnavailableColor = new Color(102, 102, 102);
+    // theme tones instead of black and grey (doc/m3-wheel-spec.md: theme tokens, nothing hardcoded)
+    private static readonly MarkerOffColor = 'var(--md-sys-color-outline, var(--secondary-text-color))';
+    private static readonly MarkerUnavailableColor = 'var(--md-sys-color-outline-variant, var(--disabled-text-color))';
 
     private _markerToLight: Record<string, ISingleLightContainer>;
     private _lightToMarker: Record<string, HueColorTempPickerMarker>;

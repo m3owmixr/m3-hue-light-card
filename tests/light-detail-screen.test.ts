@@ -8,11 +8,11 @@ import { Color } from '../src/core/colors/color';
 import { hassMockup } from './mockup-hass-states';
 
 // only what LightMarkerManager reads
-function light(id: string, on: boolean) {
+function light(id: string, on: boolean, unavailable = false) {
     return {
         getEntityId: () => id,
         isOn: () => on,
-        isUnavailable: () => false,
+        isUnavailable: () => unavailable,
         isColorModeColor: () => true,
         isColorModeTemp: () => false,
         color: null,
@@ -22,13 +22,13 @@ function light(id: string, on: boolean) {
     } as unknown as ISingleLightContainer;
 }
 
-describe('LightMarkerManager visibility', () => {
-    beforeAll(() => {
-        // jsdom has no SVG geometry; markers fall back to their fixed sizes
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (SVGElement.prototype as any).getBBox = () => ({ x: 0, y: 0, width: 0, height: 0 });
-    });
+beforeAll(() => {
+    // jsdom has no SVG geometry; markers fall back to their fixed sizes
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (SVGElement.prototype as any).getBBox = () => ({ x: 0, y: 0, width: 0, height: 0 });
+});
 
+describe('LightMarkerManager visibility', () => {
     it('hides an off light that is merely active, not selected', () => {
         const picker = new HueColorTempPicker();
         const manager = new LightMarkerManager(picker, () => undefined);
@@ -40,6 +40,22 @@ describe('LightMarkerManager visibility', () => {
 
         expect(manager.getMarker(a).hidden).toBe(false);
         expect(manager.getMarker(b).hidden).toBe(true);
+    });
+});
+
+describe('LightMarkerManager off colors', () => {
+    it('draws an off light\'s pin in the theme outline tone, not black', () => {
+        const manager = new LightMarkerManager(new HueColorTempPicker(), () => undefined);
+        const off = light('light.off', false);
+        manager.add(off);
+        expect(manager.getMarker(off).offColor).toBe('var(--md-sys-color-outline, var(--secondary-text-color))');
+    });
+
+    it('draws an unavailable light\'s pin in the outline-variant tone', () => {
+        const manager = new LightMarkerManager(new HueColorTempPicker(), () => undefined);
+        const gone = light('light.gone', false, true);
+        manager.add(gone);
+        expect(manager.getMarker(gone).offColor).toBe('var(--md-sys-color-outline-variant, var(--disabled-text-color))');
     });
 });
 
