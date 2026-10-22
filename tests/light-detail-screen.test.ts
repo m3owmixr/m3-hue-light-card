@@ -2,6 +2,10 @@ import { HueColorTempPicker } from '../src/controls/color-temp-picker';
 import { HueLightDetail, LightMarkerManager } from '../src/controls/light-detail';
 import { HueLightDetailTile } from '../src/controls/light-detail-tile';
 import { ISingleLightContainer } from '../src/types/types-interface';
+import { HomeAssistant } from 'custom-card-helpers';
+import { AreaLightController } from '../src/core/area-light-controller';
+import { Color } from '../src/core/colors/color';
+import { hassMockup } from './mockup-hass-states';
 
 // only what LightMarkerManager reads
 function light(id: string, on: boolean) {
@@ -66,5 +70,31 @@ describe('HueLightDetail styles', () => {
 
     it('keeps the control row in the layout for on/off-only lights (no jump)', () => {
         expect(cssText).toMatch(/\.controls\.invisible\s*\{\s*visibility:\s*hidden/);
+    });
+});
+
+describe('HueLightDetail merging lights on the wheel', () => {
+    it('does not reload the merged lights from hass (that would undo the drag and split the merge)', () => {
+        const hass = <HomeAssistant>{
+            ...hassMockup,
+            states: {
+                ...hassMockup.states,
+                'light.test2': { ...hassMockup.states['light.test'], entity_id: 'light.test2' }
+            }
+        };
+        const area = new AreaLightController(['light.test', 'light.test2'], new Color('#fff'));
+        area.hass = hass;
+        const detail = new HueLightDetail();
+        detail.areaController = area;
+
+        const reloaded = jest.fn();
+        area.getLights()[0].registerOnPropertyChanged('merge-test', reloaded, /* includeHass: */ true);
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (detail as any).setLightContainerFromPicker(area.getLights());
+
+        area.getLights()[0].unregisterOnPropertyChanged('merge-test');
+        expect(detail.lightContainer!.getLights().length).toBe(2);
+        expect(reloaded).not.toHaveBeenCalled();
     });
 });

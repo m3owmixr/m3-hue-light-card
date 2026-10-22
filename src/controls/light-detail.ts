@@ -113,8 +113,8 @@ export class HueLightDetail extends IdLitElement {
         }
         else {
             const entities = lights.map(l => l.getEntityId());
+            // no hass on purpose: setting it reloads every light from hass and undoes the drag that merged them
             const controller = new AreaLightController(entities, this.areaController.defaultColor);
-            controller.hass = this.areaController.hass;
             this.lightContainer = controller;
         }
 
