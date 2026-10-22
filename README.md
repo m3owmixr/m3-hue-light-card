@@ -106,10 +106,13 @@ Every option, including tap and hold actions, colors and scene settings, is in t
 
 `tint` controls how strongly the light color shows on the card.
 
-| `harmonized` (default) | `full` |
-|---|---|
-| <img alt="tint: harmonized" src="https://github.com/m3owmixr/m3-hue-light-card/raw/main/doc/m3-tint-harmonized.png" width="380" /> | <img alt="tint: full" src="https://github.com/m3owmixr/m3-hue-light-card/raw/main/doc/m3-tint-full.png" width="380" /> |
-| Blends the light color into your theme's card color. Brighter lights give a stronger tint. When off, the card uses your theme's normal card color. | The light's colors as they are, like the original Hue-Like card. |
+<p>
+  <img alt="tint: harmonized" src="https://github.com/m3owmixr/m3-hue-light-card/raw/main/doc/m3-tint-harmonized.png" width="400" />
+  <img alt="tint: full" src="https://github.com/m3owmixr/m3-hue-light-card/raw/main/doc/m3-tint-full.png" width="400" />
+</p>
+
+- **`harmonized` (default, left):** blends the light color into your theme's card color. Brighter lights give a stronger tint. When off, the card uses your theme's normal card color.
+- **`full` (right):** the light's colors as they are, like the original Hue-Like card.
 
 ```yaml
 type: custom:m3-hue-light-card
@@ -122,7 +125,7 @@ tint: full
 `slider: wavy` draws the active part of the brightness slider as a gently moving wave, in the M3 Expressive style. The wave stands still when your system's reduced-motion setting is on.
 
 <p>
-  <img alt="slider: wavy in light mode, moving" src="https://github.com/m3owmixr/m3-hue-light-card/raw/main/doc/m3-slider-wavy-light.gif" width="400" />
+  <img alt="slider: wavy in light mode, moving" src="https://github.com/m3owmixr/m3-hue-light-card/raw/main/doc/m3-slider-wavy-light.webp" width="400" />
   <img alt="slider: wavy in dark mode" src="https://github.com/m3owmixr/m3-hue-light-card/raw/main/doc/m3-slider-wavy-dark.png" width="400" />
 </p>
 <p>
