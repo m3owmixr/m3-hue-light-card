@@ -52,8 +52,8 @@ export class HassWsClient {
         if (floorResult.entity && floorResult.entity.length) {
             return {
                 groupName: floorName,
-                lights: floorResult.entity.filter((e) => e.startsWith('light.')),
-                switches: floorResult.entity?.filter((e) => e.startsWith('switch.')),
+                lights: floorResult.entity.filter((e: string) => e.startsWith('light.')),
+                switches: floorResult.entity?.filter((e: string) => e.startsWith('switch.')),
                 dataResult: floorResult
             };
         }
@@ -89,8 +89,8 @@ export class HassWsClient {
         if (areaResult.entity && areaResult.entity.length) {
             return {
                 groupName: areaName,
-                lights: areaResult.entity.filter((e) => e.startsWith('light.')),
-                switches: areaResult.entity?.filter((e) => e.startsWith('switch.')),
+                lights: areaResult.entity.filter((e: string) => e.startsWith('light.')),
+                switches: areaResult.entity?.filter((e: string) => e.startsWith('switch.')),
                 dataResult: areaResult
             };
         }
@@ -115,7 +115,7 @@ export class HassWsClient {
         const labelList = await this._hass.connection.sendMessagePromise<HassLabelInfo[]>({
             type: 'config/label_registry/list'
         });
-        const labelInfo = labelList.find(li => li.label_id == labelId);
+        const labelInfo = labelList.find((li: HassLabelInfo) => li.label_id == labelId);
         if (!labelInfo) {
             // label not found
             return null;
@@ -136,8 +136,8 @@ export class HassWsClient {
         if (labelResult.entity && labelResult.entity.length) {
             return {
                 groupName: labelName,
-                lights: labelResult.entity.filter((e) => e.startsWith('light.')),
-                switches: labelResult.entity?.filter((e) => e.startsWith('switch.')),
+                lights: labelResult.entity.filter((e: string) => e.startsWith('light.')),
+                switches: labelResult.entity?.filter((e: string) => e.startsWith('switch.')),
                 dataResult: labelResult,
                 labelInfo: labelInfo
             };
