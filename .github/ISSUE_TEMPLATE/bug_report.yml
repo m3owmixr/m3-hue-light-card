@@ -1,0 +1,86 @@
+name: Bug report
+description: Something on the card or its dialog doesn't work or looks wrong.
+labels: ['bug']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report this! A few details up front save a lot of back-and-forth.
+
+        This is the **M3 fork** of the Hue-like light card. If the bug also happens with the
+        [original card](https://github.com/Gh61/lovelace-hue-like-light-card), please report it there as well.
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: What did you expect, and what happened instead? Screenshots help a lot, so drag them in here.
+      placeholder: When I tap the card, the dialog opens but the color wheel is empty…
+    validations:
+      required: true
+
+  - type: input
+    id: card-version
+    attributes:
+      label: Card version
+      description: >-
+        Shown in HACS, or in the browser console as `M3-HUE-LIGHT-CARD v…`.
+      placeholder: v2.3.0
+    validations:
+      required: true
+
+  - type: input
+    id: ha-version
+    attributes:
+      label: Home Assistant version
+      description: Settings → About.
+      placeholder: '2026.11.1'
+    validations:
+      required: true
+
+  - type: input
+    id: browser
+    attributes:
+      label: Browser / app
+      description: Where are you viewing the dashboard?
+      placeholder: Chrome 142 on Windows / HA companion app on iOS
+    validations:
+      required: true
+
+  - type: dropdown
+    id: theme
+    attributes:
+      label: Theme mode
+      description: Colors depend on your theme, so this helps with anything that looks wrong.
+      options:
+        - Light
+        - Dark
+        - Both
+        - Not sure
+    validations:
+      required: false
+
+  - type: textarea
+    id: config
+    attributes:
+      label: Card configuration (YAML)
+      description: >-
+        Open the card in the dashboard editor, switch to the code editor and paste it here.
+        Remove anything private first.
+      render: yaml
+      placeholder: |
+        type: custom:m3-hue-light-card
+        entity: light.living_room
+    validations:
+      required: true
+
+  - type: textarea
+    id: console
+    attributes:
+      label: Browser console errors (optional)
+      description: >-
+        If you can, open the browser's developer tools (F12, or Cmd+Option+J on a Mac),
+        go to the Console tab and paste any red errors.
+      render: text
+    validations:
+      required: false
