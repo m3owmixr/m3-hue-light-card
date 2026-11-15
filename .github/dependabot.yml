@@ -6,8 +6,11 @@
 version: 2
 updates:
   # Maintain dependencies for GitHub Actions
+  # PRs target m3-restyle (not the default branch) so main can keep
+  # fast-forwarding from m3-restyle at release time.
   - package-ecosystem: 'github-actions'
     directory: '/'
+    target-branch: 'm3-restyle'
     schedule:
       interval: 'monthly'
     commit-message:
@@ -16,15 +19,19 @@ updates:
   # Maintain dependencies for npm
   - package-ecosystem: 'npm' # See documentation for possible values
     directory: '/' # Location of package manifests
+    target-branch: 'm3-restyle'
     schedule:
-      interval: 'weekly'
+      interval: 'monthly'
     commit-message:
       prefix: 'build'
       prefix-development: 'chore'
       include: 'scope'
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 5
     groups:
-      eslint-group:
-        patterns:
-          - "@typescript-eslint/*"
-          - "eslint-config-airbnb-typescript"
+      # All minor/patch bumps to build and test tooling arrive as one PR.
+      # Major bumps still get their own PR so a breaking change is easy to spot.
+      dev-dependencies:
+        dependency-type: 'development'
+        update-types:
+          - 'minor'
+          - 'patch'
